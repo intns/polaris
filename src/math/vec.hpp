@@ -4,6 +4,7 @@
 #include <cmath>
 #include <concepts>
 #include <iostream>
+#include <type_traits>
 
 namespace polaris::math {
 
@@ -18,24 +19,15 @@ class Vec3 {
   explicit Vec3(T _x, T _y, T _z) : x_(_x), y_(_y), z_(_z) {}
 
   Vec3 operator-() const { return Vec3(-x_, -y_, -z_); }
-
-  Vec3 operator+(const Vec3& v) const {
-    return Vec3(x_ + v.x_, y_ + v.y_, z_ + v.z_);
-  }
-  Vec3 operator-(const Vec3& v) const {
-    return Vec3(x_ - v.x_, y_ - v.y_, z_ - v.z_);
-  }
-  Vec3 operator*(const Vec3& v) const {
-    return Vec3(x_ * v.x_, y_ * v.y_, z_ * v.z_);
-  }
-  Vec3 operator/(const Vec3& v) const {
-    return Vec3(x_ / v.x_, y_ / v.y_, z_ / v.z_);
-  }
-
   Vec3 operator*(T s) const { return Vec3(x_ * s, y_ * s, z_ * s); }
   Vec3 operator/(T s) const { return Vec3(x_ / s, y_ / s, z_ / s); }
 
   // clang-format off
+  Vec3 operator+(const Vec3& v) const { return Vec3(x_ + v.x_, y_ + v.y_, z_ + v.z_); }
+  Vec3 operator-(const Vec3& v) const { return Vec3(x_ - v.x_, y_ - v.y_, z_ - v.z_); }
+  Vec3 operator*(const Vec3& v) const { return Vec3(x_ * v.x_, y_ * v.y_, z_ * v.z_); }
+  Vec3 operator/(const Vec3& v) const { return Vec3(x_ / v.x_, y_ / v.y_, z_ / v.z_); }
+
   Vec3& operator+=(const Vec3& v) { x_ += v.x_; y_ += v.y_; z_ += v.z_; return *this; }
   Vec3& operator-=(const Vec3& v) { x_ -= v.x_; y_ -= v.y_; z_ -= v.z_; return *this; }
   Vec3& operator*=(const Vec3& v) { x_ *= v.x_; y_ *= v.y_; z_ *= v.z_; return *this; }
@@ -59,7 +51,13 @@ class Vec3 {
   T z() const { return z_; }
 
   friend std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-    return out << v.x() << ' ' << v.y() << ' ' << v.z();
+    if constexpr (std::is_integral_v<T> && sizeof(T) == 1) {
+      // Print byte-sized integers as numbers, not characters
+      return out << static_cast<int>(v.x()) << ' ' << static_cast<int>(v.y())
+                 << ' ' << static_cast<int>(v.z());
+    } else {
+      return out << v.x() << ' ' << v.y() << ' ' << v.z();
+    }
   }
 
  private:
@@ -69,6 +67,13 @@ class Vec3 {
 using Vec3f = Vec3<float>;
 using Vec3d = Vec3<double>;
 using Vec3i = Vec3<int>;
+
+// Allow scalar on the left: s * v
+template <typename T>
+  requires is_numeric<T>
+inline Vec3<T> operator*(T s, const Vec3<T>& v) {
+  return v * s;
+}
 
 }  // namespace polaris::math
 

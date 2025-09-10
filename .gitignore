@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+*.ppm
 
 # Compiled Object files
 *.slo
@@ -32,3 +33,6 @@
 *.app
 /build
 /.vscode
+
+# IDE
+.idea
