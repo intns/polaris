@@ -8,18 +8,18 @@ namespace polaris::math {
 class Ray {
  public:
   Ray() = default;
-  explicit Ray(const Vec3d& origin, const Vec3d& direction)
+  explicit Ray(const Vec3& origin, const Vec3& direction)
       : origin_(origin), direction_(direction) {}
 
-  const Vec3d& Origin() const { return origin_; }
-  const Vec3d& Direction() const { return direction_; }
-  Vec3d At(double t) const { return origin_ + direction_ * t; }
+  const Vec3& origin() const { return origin_; }
+  const Vec3& direction() const { return direction_; }
+
+  Vec3 at(double t) const { return origin_ + t * direction_; }
 
  private:
-  Vec3d origin_;
-  Vec3d direction_;
+  Vec3 origin_;
+  Vec3 direction_;
 };
-
 }  // namespace polaris::math
 
 #endif

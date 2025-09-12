@@ -1,7 +1,12 @@
 #include <image/PPM.hpp>
 
 namespace polaris::image {
-void PPM::Set(std::uint16_t x, std::uint16_t y, const Pixel& p) {
+PixelU8 PixelF64::ToU8() const {
+  return PixelU8(static_cast<int>(r * 255.999), static_cast<int>(g * 255.999),
+                 static_cast<int>(b * 255.999));
+}
+
+void PPM::Set(std::size_t x, std::size_t y, const PixelU8& p) {
   // transform into 1d index
   const auto index = (y * width_) + x;
 
@@ -19,9 +24,10 @@ void PPM::Write(std::ofstream& fstream) {
   fstream << width_ << ' ' << height_ << std::endl;
   fstream << "255" << std::endl;
 
-  for (int x = 0; x < width_; x++) {
-    for (int y = 0; y < height_; y++) {
-      fstream << data_[(x * width_) + y] << std::endl;
+  for (int y = 0; y < height_; y++) {
+    for (int x = 0; x < width_; x++) {
+      const auto idx = (y * width_) + x;
+      fstream << data_[idx] << std::endl;
     }
   }
 }
