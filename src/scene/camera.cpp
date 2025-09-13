@@ -84,13 +84,12 @@ image::PixelF64 Camera::RayColour(const math::Ray& r,
                                   const scene::Hittable& world) {
   scene::HitRecord rec;
   if (world.Hit(r, math::Interval_d(0, math::kInfinity), rec)) {
-    auto p = image::PixelF64(1.0, 1.0, 1.0);
-    return 0.5 * (p + (rec.normal_ * math::kPi).unit_vector());
+    auto direction = math::Vec3::RandomOnHemisphere(rec.normal_);
+    return 0.5 * RayColour(math::Ray(rec.point_, direction), world);
   }
 
   math::Vec3 unit_direction = r.direction().unit_vector();
   auto a = 0.5 * (unit_direction.y() + 1.0);
-  a = std::tan(a);
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +
          a * image::PixelF64(0.5, 0.7, 1.0);
 }

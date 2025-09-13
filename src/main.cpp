@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   scene::CameraSettings settings;
   settings.aspect_ratio_ = 4.0 / 3.0;
   settings.image_width_ = 500;
-  settings.samples_per_pixel = 50;
+  settings.samples_per_pixel = 10;
 
   scene::Camera cam(settings);
   cam.Render(world);

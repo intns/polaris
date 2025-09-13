@@ -19,7 +19,7 @@ inline double RandomDouble() {
   return distribution(generator);
 }
 
-inline double RandomDouble(double min = 0.0, double max = 1.0) {
+inline double RandomDouble(double min, double max) {
   static std::mt19937 generator(std::random_device{}());
   std::uniform_real_distribution<double> distribution(min, max);
   return distribution(generator);
