@@ -21,7 +21,7 @@ double hit_sphere(const math::Vec3& center, double radius, const math::Ray& r) {
 }
 
 image::PixelF64 ray_color(const math::Ray& r) {
-  auto t = hit_sphere(math::Vec3(0, 0, -1), 0.15, r);
+  auto t = hit_sphere(math::Vec3(0, 0, -1), 0.75, r);
   if (t > 0.0) {
     auto N = (r.at(t) - math::Vec3{0, 0, -1}).unit_vector();
     return 0.5 * image::PixelF64(N.x() + 1, N.y() + 1, N.z() + 1);
