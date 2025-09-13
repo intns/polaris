@@ -32,8 +32,28 @@
 *.out
 *.app
 /build
+Release/
+Debug/
+/**/CMakeFiles/
+/**/CMakeCache.txt
+/**/cmake_install.cmake
+*.vcxproj*
+*.sln
+*.ilk
+*.pdb
 
 # IDE
 .idea
 /.vscode
 .cache/
+.ipch/
+*.VC.db
+*.opendb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated outputs
+*.bmp
+compile_commands.json

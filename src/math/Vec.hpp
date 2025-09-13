@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
-#include <math/common.hpp>
+#include <math/Common.hpp>
 
 namespace polaris::math {
 
@@ -15,9 +15,9 @@ class Vec3 {
   constexpr Vec3() noexcept : e{0, 0, 0} {}
   constexpr Vec3(double e0, double e1, double e2) noexcept : e{e0, e1, e2} {}
 
-  [[nodiscard]] constexpr double x() const noexcept { return e[0]; }
-  [[nodiscard]] constexpr double y() const noexcept { return e[1]; }
-  [[nodiscard]] constexpr double z() const noexcept { return e[2]; }
+  [[nodiscard]] constexpr double X() const noexcept { return e[0]; }
+  [[nodiscard]] constexpr double Y() const noexcept { return e[1]; }
+  [[nodiscard]] constexpr double Z() const noexcept { return e[2]; }
 
   [[nodiscard]] constexpr Vec3 operator-() const noexcept {
     return {-e[0], -e[1], -e[2]};
@@ -57,40 +57,42 @@ class Vec3 {
 
   Vec3& operator/=(double t) { return *this *= 1 / t; }
 
-  [[nodiscard]] double length() const { return std::sqrt(length_squared()); }
-  [[nodiscard]] constexpr double length_squared() const noexcept {
+  [[nodiscard]] double Length() const { return std::sqrt(LengthSquared()); }
+  [[nodiscard]] constexpr double LengthSquared() const noexcept {
     return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
   }
+
   [[nodiscard]] static Vec3 Random() {
     return {RandomDouble(), RandomDouble(), RandomDouble()};
   }
+
   [[nodiscard]] static Vec3 Random(double min, double max) {
     return {RandomDouble(min, max), RandomDouble(min, max),
             RandomDouble(min, max)};
   }
 
-  [[nodiscard]] constexpr double dot(const Vec3& v) const noexcept {
+  [[nodiscard]] constexpr double Dot(const Vec3& v) const noexcept {
     return e[0] * v.e[0] + e[1] * v.e[1] + e[2] * v.e[2];
   }
 
-  [[nodiscard]] constexpr Vec3 cross(const Vec3& v) const noexcept {
+  [[nodiscard]] constexpr Vec3 Cross(const Vec3& v) const noexcept {
     return {e[1] * v.e[2] - e[2] * v.e[1], e[2] * v.e[0] - e[0] * v.e[2],
             e[0] * v.e[1] - e[1] * v.e[0]};
   }
 
-  [[nodiscard]] inline Vec3 unit_vector() const { return *this / length(); }
+  [[nodiscard]] inline Vec3 Unit() const { return *this / Length(); }
 
   // Thanks GPT
   [[nodiscard]] static inline Vec3 RandomUnitVector() {
-    auto z = RandomDouble(-1, 1);
+    auto Z = RandomDouble(-1, 1);
     auto a = RandomDouble(0, 2 * std::numbers::pi);
-    auto r = std::sqrt(1 - z * z);
-    return {r * std::cos(a), r * std::sin(a), z};
+    auto r = std::sqrt(1 - Z * Z);
+    return {r * std::cos(a), r * std::sin(a), Z};
   }
 
   [[nodiscard]] static inline Vec3 RandomOnHemisphere(const Vec3& normal) {
     const auto on_unit_sphere = RandomUnitVector();
-    if (on_unit_sphere.dot(normal) > 0.0) {
+    if (on_unit_sphere.Dot(normal) > 0.0) {
       return on_unit_sphere;
     } else {
       return -on_unit_sphere;

@@ -1,7 +1,7 @@
 #ifndef POLARIS_MATH_RAY_HPP
 #define POLARIS_MATH_RAY_HPP
 
-#include <math/vec.hpp>
+#include <math/Vec.hpp>
 
 namespace polaris::math {
 

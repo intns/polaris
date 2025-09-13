@@ -1,9 +1,9 @@
 #ifndef POLARIS_SCENE_OBJECTS_SPHERE_HPP
 #define POLARIS_SCENE_OBJECTS_SPHERE_HPP
 
-#include <math/ray.hpp>
-#include <math/vec.hpp>
-#include <scene/hittable.hpp>
+#include <math/Ray.hpp>
+#include <math/Vec.hpp>
+#include <scene/Hittable.hpp>
 
 namespace polaris::scene::objects {
 class Sphere : public Hittable {
@@ -11,12 +11,12 @@ class Sphere : public Hittable {
   Sphere(const math::Vec3& _center, double _radius)
       : center_(_center), radius_(std::fmax(0, _radius)) {}
 
-  [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval_d& t_interval,
-                         HitRecord& rec) const override {
+  [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval& t_interval,
+                         HitInfo& rec) const override {
     math::Vec3 oc = center_ - r.origin();
-    auto a = r.direction().length_squared();
-    auto h = r.direction().dot(oc);
-    auto c = oc.length_squared() - radius_ * radius_;
+    auto a = r.direction().LengthSquared();
+    auto h = r.direction().Dot(oc);
+    auto c = oc.LengthSquared() - radius_ * radius_;
 
     auto discriminant = h * h - a * c;
     if (discriminant < 0) return false;

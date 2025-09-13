@@ -1,16 +1,17 @@
 #include <chrono>
-#include <math/common.hpp>
-#include <scene/camera.hpp>
+#include <math/Common.hpp>
+#include <scene/Camera.hpp>
+#include <stdexcept>
 
 namespace polaris::scene {
 
 void Camera::Initialise() {
-  const auto image_width = settings_.image_width_;
+  const auto image_width = settings_.image_width;
 
-  image_height_ = static_cast<int>(image_width / settings_.aspect_ratio_);
+  image_height_ = static_cast<int>(image_width / settings_.aspect_ratio);
   image_height_ = std::max(image_height_, 1);
 
-  ppm_.Resize(image_width, image_height_);
+  frame_buffer_.Assign(settings_.output_format_, image_width, image_height_);
 
   pixel_samples_scale_ = 1.0 / settings_.samples_per_pixel;
 
@@ -38,38 +39,37 @@ void Camera::Initialise() {
 }
 
 void Camera::Write(const std::string& filename) {
-  std::ofstream f(filename);
+  std::ofstream f(filename, std::ios::binary);
   if (!f.is_open()) {
     return;
   }
 
-  ppm_.Write(f);
+  frame_buffer_.Write(f);
 }
 
 void Camera::Render(const Hittable& world) {
   for (int y = 0; y < image_height_; y++) {
-    for (int x = 0; x < settings_.image_width_; x++) {
-      auto pixel_center =
-          pixel00_loc_ + (x * pixel_delta_u_) + (y * pixel_delta_v_);
-
+    for (int x = 0; x < settings_.image_width; x++) {
       // Iteratively sample the pixel colour
-      image::PixelF64 pixel(0.0, 0.0, 0.0);
+      image::PixelF64 ambient_col(0.0, 0.0, 0.0);
       for (std::uint32_t i = 0; i < settings_.samples_per_pixel; i++) {
-        pixel += RayColour(GetRayFor(x, y), settings_.max_depth_, world);
+        ambient_col += RayColour(GetRayFor(x, y), settings_.max_depth_, world);
       }
 
-      ppm_.Set(x, y, pixel * pixel_samples_scale_);
+      ambient_col *= pixel_samples_scale_;
+
+      frame_buffer_.Set(x, y, static_cast<image::PixelU8>(ambient_col));
     }
   }
 }
 
-math::Ray Camera::GetRayFor(int x, int y) const {
+math::Ray Camera::GetRayFor(int X, int Y) const {
   const auto offset = math::Vec3(math::RandomDouble(-0.5, 0.5),
                                  math::RandomDouble(-0.5, 0.5), 0.0);
 
   // Jitter the pixels and scale them
-  const auto pixel_offset_u = (x + offset.x()) * pixel_delta_u_;
-  const auto pixel_offset_v = (y + offset.y()) * pixel_delta_v_;
+  const auto pixel_offset_u = (X + offset.X()) * pixel_delta_u_;
+  const auto pixel_offset_v = (Y + offset.Y()) * pixel_delta_v_;
 
   const auto pixel_sample = pixel00_loc_ + pixel_offset_u + pixel_offset_v;
 
@@ -83,14 +83,14 @@ image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
     return {0, 0, 0};
   }
 
-  scene::HitRecord rec;
-  if (world.Hit(r, math::Interval_d(0.001, math::kInfinity), rec)) {
+  scene::HitInfo rec;
+  if (world.Hit(r, math::Interval(0.001, math::kInfinity), rec)) {
     auto direction = rec.normal_ + math::Vec3::RandomUnitVector();
     return 0.5 * RayColour(math::Ray(rec.point_, direction), depth - 1, world);
   }
 
-  math::Vec3 unit_direction = r.direction().unit_vector();
-  auto a = 0.5 * (unit_direction.y() + 1.0);
+  math::Vec3 unit_direction = r.direction().Unit();
+  auto a = 0.5 * (unit_direction.Y() + 1.0);
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +
          a * image::PixelF64(1, 0.5, 0.5);
 }
