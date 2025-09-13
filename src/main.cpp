@@ -5,19 +5,26 @@
 using namespace polaris;
 
 namespace {
-  
-bool hit_sphere(const math::Vec3& center, double radius, const math::Ray& r) {
-  math::Vec3 oc = r.origin() - center;
+
+double hit_sphere(const math::Vec3& center, double radius, const math::Ray& r) {
+  auto oc = center - r.origin();
   auto a = r.direction().length_squared();
-  auto half_b = oc.dot(r.direction());
+  auto h = r.direction().dot(oc);
   auto c = oc.length_squared() - radius * radius;
-  auto discriminant = half_b * half_b - a * c;
-  return (discriminant > 0);
+  auto discriminant = h * h - a * c;
+
+  if (discriminant < 0) {
+    return -1.0;
+  } else {
+    return (h - std::sqrt(discriminant)) / a;
+  }
 }
 
 image::PixelF64 ray_color(const math::Ray& r) {
-  if (hit_sphere(math::Vec3(0, 0, -1), 0.5, r)) {
-    return image::PixelF64(1, 0, 0);
+  auto t = hit_sphere(math::Vec3(0, 0, -1), 0.15, r);
+  if (t > 0.0) {
+    auto N = (r.at(t) - math::Vec3{0, 0, -1}).unit_vector();
+    return 0.5 * image::PixelF64(N.x() + 1, N.y() + 1, N.z() + 1);
   }
 
   math::Vec3 unit_direction = r.direction().unit_vector();
