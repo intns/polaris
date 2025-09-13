@@ -32,7 +32,6 @@
 *.out
 *.app
 /build
-/.vscode
 
 # IDE
 .idea
