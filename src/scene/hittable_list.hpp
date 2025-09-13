@@ -21,14 +21,15 @@ public:
     objects.push_back(object);
   }
 
-  [[nodiscard]] bool Hit(const math::Ray& r, double ray_tmin, double ray_tmax,
+  [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval_d& t_interval,
                          HitRecord& rec) const override {
     bool hit_anything = false;
-    auto closest_so_far = ray_tmax;
+    auto closest_so_far = t_interval.Max();
 
     HitRecord temp_rec;
     for (const auto& object : objects) {
-      if (object->Hit(r, ray_tmin, closest_so_far, temp_rec)) {
+      if (object->Hit(r, math::Interval_d(t_interval.Min(), closest_so_far),
+                      temp_rec)) {
         hit_anything = true;
         closest_so_far = temp_rec.t_;
         rec = temp_rec;

@@ -27,8 +27,10 @@ void PPM::Write(std::ofstream& fstream) {
   for (int y = 0; y < height_; y++) {
     for (int x = 0; x < width_; x++) {
       const auto idx = (y * width_) + x;
-      fstream << data_[idx] << std::endl;
+      fstream << data_[idx] << '\n';
     }
   }
+
+  fstream.flush();
 }
 }  // namespace polaris::image

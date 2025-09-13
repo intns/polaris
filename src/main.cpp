@@ -11,13 +11,14 @@ using namespace polaris;
 namespace {
 image::PixelF64 ray_color(const math::Ray& r, const scene::Hittable& world) {
   scene::HitRecord rec;
-  if (world.Hit(r, 0.001, math::kInfinity, rec)) {
+  if (world.Hit(r, math::Interval_d(0, math::kInfinity), rec)) {
     auto p = image::PixelF64(1.0, 1.0, 1.0);
-    return 0.5 * (p + rec.normal_);
+    return 0.5 * (p + (rec.normal_ * math::kPi).unit_vector());
   }
 
   math::Vec3 unit_direction = r.direction().unit_vector();
   auto a = 0.5 * (unit_direction.y() + 1.0);
+  a = std::tan(a);
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +
          a * image::PixelF64(0.5, 0.7, 1.0);
 }
@@ -26,16 +27,19 @@ image::PixelF64 ray_color(const math::Ray& r, const scene::Hittable& world) {
 int main(int argc, char** argv) {
   using namespace polaris;
 
+  (void)argc;
+  (void)argv;
+
   // Calculate image dimensions, working backwards from width in a 16:9 ratio
   constexpr auto target_aspect_ratio = 16.0 / 9.0;
-  constexpr auto image_width = 400;
-  int image_height = image_width / target_aspect_ratio;
+  constexpr auto image_width = 3000;
+  int image_height = static_cast<int>(image_width / target_aspect_ratio);
   image_height = std::max(image_height, 1);  // Minimum height of 1
 
   const auto aspect_ratio = static_cast<double>(image_width) / image_height;
 
   // Camera
-  auto focal_length = 1.0;
+  auto focal_length = 1;
   auto viewport_height = 2.0;
   auto viewport_width = viewport_height * aspect_ratio;
 

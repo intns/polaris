@@ -11,7 +11,7 @@ class Sphere : public Hittable {
   Sphere(const math::Vec3& _center, double _radius)
       : center_(_center), radius_(std::fmax(0, _radius)) {}
 
-  [[nodiscard]] bool Hit(const math::Ray& r, double ray_tmin, double ray_tmax,
+  [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval_d& t_interval,
                          HitRecord& rec) const override {
     math::Vec3 oc = center_ - r.origin();
     auto a = r.direction().length_squared();
@@ -24,9 +24,11 @@ class Sphere : public Hittable {
     auto sqrtd = std::sqrt(discriminant);
 
     auto root = (h - sqrtd) / a;
-    if (root <= ray_tmax || ray_tmax <= root) {
+    if (!t_interval.Surrounds(root)) {
       root = (h + sqrtd) / a;
-      if (root <= ray_tmin || ray_tmax <= root) return false;
+      if (!t_interval.Contains(root)) {
+        return false;
+      }
     }
 
     rec.t_ = root;

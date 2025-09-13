@@ -1,6 +1,7 @@
 #ifndef POLARIS_SCENE_HITTABLE_HPP
 #define POLARIS_SCENE_HITTABLE_HPP
 
+#include <math/interval.hpp>
 #include <math/ray.hpp>
 #include <math/vec.hpp>
 
@@ -22,7 +23,8 @@ class Hittable {
  public:
   virtual ~Hittable() = default;
 
-  [[nodiscard]] virtual bool Hit(const math::Ray& r, double t_min, double t_max,
+  [[nodiscard]] virtual bool Hit(const math::Ray& r,
+                                 const math::Interval_d& t_interval,
                                  HitRecord& rec) const = 0;
 };
 
