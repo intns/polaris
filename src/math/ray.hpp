@@ -8,7 +8,7 @@ namespace polaris::math {
 class Ray {
  public:
   Ray() = default;
-  explicit Ray(const Vec3& origin, const Vec3& direction)
+  Ray(const Vec3& origin, const Vec3& direction)
       : origin_(origin), direction_(direction) {}
 
   const Vec3& origin() const { return origin_; }

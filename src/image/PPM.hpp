@@ -105,8 +105,16 @@ class PixelU8 {
 
 class PPM {
  public:
+  PPM() = default;
+
   PPM(std::size_t _width, std::size_t _height)
       : width_(_width), height_(_height) {
+    data_.resize(width_ * height_);
+  }
+
+  void Resize(std::size_t _width, std::size_t _height) {
+    width_ = _width;
+    height_ = _height;
     data_.resize(width_ * height_);
   }
 
@@ -121,8 +129,8 @@ class PPM {
   std::size_t Height() const { return height_; }
 
  private:
-  std::size_t width_;
-  std::size_t height_;
+  std::size_t width_ = 0;
+  std::size_t height_ = 0;
 
   std::vector<PixelU8> data_;
 };
