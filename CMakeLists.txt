@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(polaris VERSION 0.1.0 LANGUAGES CXX)
+project(
+    polaris
+    VERSION 0.1.0
+    DESCRIPTION "Basic Raytracer"
+    LANGUAGES CXX
+)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Collect sources and headers
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS

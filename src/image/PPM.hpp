@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <fstream>
 #include <math/vec.hpp>
-#include <string>
 #include <vector>
 
 namespace polaris::image {

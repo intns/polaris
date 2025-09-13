@@ -37,3 +37,4 @@
 # IDE
 .idea
 /.vscode
+.cache/

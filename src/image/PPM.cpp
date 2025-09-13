@@ -27,5 +27,6 @@ void PPM::Write(std::ofstream& fstream) {
   for (size_t i = 0; i < data_.size(); i++) {
     fstream << data_[i] << '\n';
   }
+  fstream.flush();
 }
 }  // namespace polaris::image
