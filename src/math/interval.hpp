@@ -39,6 +39,12 @@ class Interval {
     return min_ < x && x < max_;
   }
 
+  [[nodiscard]] constexpr double Clamp(T x) const noexcept {
+    if (x < min_) return min_;
+    if (x > max_) return max_;
+    return x;
+  }
+
   [[nodiscard]] constexpr bool Contains(T x) const noexcept {
     return min_ <= x && x <= max_;
   }
