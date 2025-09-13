@@ -2,12 +2,20 @@
 #include <math/interval.hpp>
 
 namespace polaris::image {
+inline static double LinearToGamma(double linear) {
+  return linear > 0 ? std::sqrt(linear) : 0;
+}
+
 PixelU8 PixelF64::ToU8() const {
   static const math::Interval_d intensity(0, 0.9999);
 
-  return PixelU8(static_cast<int>(intensity.Clamp(r) * 256),
-                 static_cast<int>(intensity.Clamp(g) * 256),
-                 static_cast<int>(intensity.Clamp(b) * 256));
+  double gR = LinearToGamma(r);
+  double gG = LinearToGamma(g);
+  double gB = LinearToGamma(b);
+
+  return PixelU8(static_cast<int>(intensity.Clamp(gR) * 256),
+                 static_cast<int>(intensity.Clamp(gG) * 256),
+                 static_cast<int>(intensity.Clamp(gB) * 256));
 }
 
 void PPM::Set(std::size_t x, std::size_t y, const PixelU8& p) {

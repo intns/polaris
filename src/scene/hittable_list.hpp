@@ -1,25 +1,19 @@
 #ifndef POLARIS_SCENE_HITTABLE_LIST_HPP
 #define POLARIS_SCENE_HITTABLE_LIST_HPP
 
-#include <scene/hittable.hpp>
-
 #include <memory>
+#include <scene/hittable.hpp>
 #include <vector>
-
 
 namespace polaris::scene {
 class HittableList : public Hittable {
-public:
-  std::vector<std::shared_ptr<Hittable>> objects;
-
-  HittableList() {}
-  HittableList(std::shared_ptr<Hittable> object) { Add(object); };
+ public:
+  HittableList() = default;
+  explicit HittableList(std::shared_ptr<Hittable> object) { Add(object); };
 
   void Clear() { objects.clear(); }
 
-  void Add(std::shared_ptr<Hittable> object) {
-    objects.push_back(object);
-  }
+  void Add(std::shared_ptr<Hittable> object) { objects.push_back(object); }
 
   [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval_d& t_interval,
                          HitRecord& rec) const override {
@@ -38,7 +32,10 @@ public:
 
     return hit_anything;
   }
+
+ private:
+  std::vector<std::shared_ptr<Hittable>> objects;
 };
-} // namespace polaris::scene
+}  // namespace polaris::scene
 
 #endif

@@ -42,6 +42,6 @@ class Sphere : public Hittable {
   math::Vec3 center_;
   double radius_;
 };
-}  // namespace polaris::scene
+}  // namespace polaris::scene::objects
 
 #endif

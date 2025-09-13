@@ -15,14 +15,14 @@ class PixelF64 {
  public:
   PixelF64() : r(0.0f), g(0.0f), b(0.0f) {}
   PixelF64(double _r, double _g, double _b) : r(_r), g(_g), b(_b) {}
-  // Allow constructing a PixelF64 directly from a math::Vec3 (x->r, y->g, z->b)
-  PixelF64(const polaris::math::Vec3& v) : r(v.x()), g(v.y()), b(v.z()) {}
+  explicit PixelF64(const polaris::math::Vec3& v)
+      : r(v.x()), g(v.y()), b(v.z()) {}
 
-  double R() const { return r; }
-  double G() const { return g; }
-  double B() const { return b; }
+  [[nodiscard]] double R() const { return r; }
+  [[nodiscard]] double G() const { return g; }
+  [[nodiscard]] double B() const { return b; }
 
-  PixelU8 ToU8() const;
+  [[nodiscard]] PixelU8 ToU8() const;
 
   // clang-format off
   PixelF64& operator+=(const PixelF64& o) { r += o.r; g += o.g; b += o.b; return *this; }
@@ -65,12 +65,11 @@ class PixelF64 {
   // Symmetric free operators with Vec3 on the left-hand side
   friend PixelF64 operator+(const polaris::math::Vec3& v, const PixelF64& p) { return p + v; }
   friend PixelF64 operator*(const polaris::math::Vec3& v, const PixelF64& p) { return p * v; }
-  friend PixelF64 operator-(const polaris::math::Vec3& v, const PixelF64& p) { return PixelF64(v.x() - p.r, v.y() - p.g, v.z() - p.b); }
-  friend PixelF64 operator/(const polaris::math::Vec3& v, const PixelF64& p) { return PixelF64(v.x() / p.r, v.y() / p.g, v.z() / p.b); }
+  friend PixelF64 operator-(const polaris::math::Vec3& v, const PixelF64& p) { return {v.x() - p.r, v.y() - p.g, v.z() - p.b}; }
+  friend PixelF64 operator/(const polaris::math::Vec3& v, const PixelF64& p) { return {v.x() / p.r, v.y() / p.g, v.z() / p.b}; }
 
   bool operator==(const PixelF64& o) const { return r == o.r && g == o.g && b == o.b; }
   bool operator!=(const PixelF64& o) const { return !(*this == o); }
-
   // clang-format on
 
  private:
@@ -88,14 +87,13 @@ class PixelU8 {
         g(static_cast<std::uint8_t>(_g)),
         b(static_cast<std::uint8_t>(_b)) {}
 
-  std::uint8_t R() const { return r; }
-  std::uint8_t G() const { return g; }
-  std::uint8_t B() const { return b; }
-
-  PixelF64 ToF32() const { return {r / 255.999f, g / 255.999f, b / 255.999f}; }
+  [[nodiscard]] std::uint8_t R() const { return r; }
+  [[nodiscard]] std::uint8_t G() const { return g; }
+  [[nodiscard]] std::uint8_t B() const { return b; }
 
   friend std::ofstream& operator<<(std::ofstream& os, const PixelU8& p) {
-    os << int(p.r) << ' ' << int(p.g) << ' ' << int(p.b);
+    os << static_cast<int>(p.r) << ' ' << static_cast<int>(p.g) << ' '
+       << static_cast<int>(p.b);
     return os;
   }
 
@@ -125,8 +123,8 @@ class PPM {
 
   void Write(std::ofstream& fstream);
 
-  std::size_t Width() const { return width_; }
-  std::size_t Height() const { return height_; }
+  [[nodiscard]] std::size_t Width() const { return width_; }
+  [[nodiscard]] std::size_t Height() const { return height_; }
 
  private:
   std::size_t width_ = 0;

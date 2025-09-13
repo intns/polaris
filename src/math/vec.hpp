@@ -65,7 +65,8 @@ class Vec3 {
     return {RandomDouble(), RandomDouble(), RandomDouble()};
   }
   [[nodiscard]] static Vec3 Random(double min, double max) {
-    return {RandomDouble(min, max), RandomDouble(min, max), RandomDouble(min, max)};
+    return {RandomDouble(min, max), RandomDouble(min, max),
+            RandomDouble(min, max)};
   }
 
   [[nodiscard]] constexpr double dot(const Vec3& v) const noexcept {
@@ -74,32 +75,26 @@ class Vec3 {
 
   [[nodiscard]] constexpr Vec3 cross(const Vec3& v) const noexcept {
     return {e[1] * v.e[2] - e[2] * v.e[1], e[2] * v.e[0] - e[0] * v.e[2],
-                e[0] * v.e[1] - e[1] * v.e[0]};
+            e[0] * v.e[1] - e[1] * v.e[0]};
   }
 
   [[nodiscard]] inline Vec3 unit_vector() const { return *this / length(); }
+
+  // Thanks GPT
   [[nodiscard]] static inline Vec3 RandomUnitVector() {
-    while (true) {
-      auto p = Vec3::Random(-1, 1);
-      auto lensq = p.length_squared();
-      if (lensq <= 1) {
-        return p / sqrt(lensq);
-      }
-    }
+    auto z = RandomDouble(-1, 1);
+    auto a = RandomDouble(0, 2 * std::numbers::pi);
+    auto r = std::sqrt(1 - z * z);
+    return {r * std::cos(a), r * std::sin(a), z};
   }
-  [[nodiscard]] static inline Vec3 QRandomUnitVector() {
-    // thanks gippity
-    double z = RandomDouble(-1, 1);          // cos(theta) uniformly
-    double a = RandomDouble(0, 2*M_PI);      // azimuth
-    double r = std::sqrt(1 - z*z);
-    return {r*std::cos(a), r*std::sin(a), z};
-  }
+
   [[nodiscard]] static inline Vec3 RandomOnHemisphere(const Vec3& normal) {
-    Vec3 on_unit_sphere = RandomUnitVector();
-    if (on_unit_sphere.dot(normal) > 0.0)
+    const auto on_unit_sphere = RandomUnitVector();
+    if (on_unit_sphere.dot(normal) > 0.0) {
       return on_unit_sphere;
-    else
+    } else {
       return -on_unit_sphere;
+    }
   }
 
   friend inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {

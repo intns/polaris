@@ -1,18 +1,23 @@
 #ifndef POLARIS_MATH_COMMON_HPP
 #define POLARIS_MATH_COMMON_HPP
 
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <numbers>
 #include <random>
 
 namespace polaris::math {
 
-const double kInfinity = std::numeric_limits<double>::infinity();
-const double kPi = 3.1415926535897932385;
+constexpr auto kInfinity = std::numeric_limits<double>::infinity();
 
-inline double DegreesToRadians(double degrees) { return degrees * kPi / 180.0; }
-inline double RadiansToDegrees(double radians) { return radians * 180.0 / kPi; }
+inline double DegreesToRadians(double degrees) {
+  return degrees * std::numbers::pi / 180.0;
+}
+inline double RadiansToDegrees(double radians) {
+  return radians * 180.0 / std::numbers::pi;
+}
 inline double RandomDouble() {
   static std::mt19937 generator(std::random_device{}());
   static std::uniform_real_distribution<double> distribution(0.0, 1.0);

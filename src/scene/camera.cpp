@@ -1,3 +1,4 @@
+#include <chrono>
 #include <math/common.hpp>
 #include <scene/camera.hpp>
 
@@ -51,17 +52,13 @@ void Camera::Render(const Hittable& world) {
       auto pixel_center =
           pixel00_loc_ + (x * pixel_delta_u_) + (y * pixel_delta_v_);
 
-      auto ray_direction = pixel_center - center_;
-
       // Iteratively sample the pixel colour
       image::PixelF64 pixel(0.0, 0.0, 0.0);
       for (std::uint32_t i = 0; i < settings_.samples_per_pixel; i++) {
-        pixel += RayColour(GetRayFor(x, y), world);
+        pixel += RayColour(GetRayFor(x, y), settings_.max_depth_, world);
       }
 
-      pixel *= pixel_samples_scale_;
-
-      ppm_.Set(x, y, pixel);
+      ppm_.Set(x, y, pixel * pixel_samples_scale_);
     }
   }
 }
@@ -80,18 +77,22 @@ math::Ray Camera::GetRayFor(int x, int y) const {
   return {center_, ray_direction};
 }
 
-image::PixelF64 Camera::RayColour(const math::Ray& r,
+image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
                                   const scene::Hittable& world) {
+  if (depth == 0) {
+    return {0, 0, 0};
+  }
+
   scene::HitRecord rec;
-  if (world.Hit(r, math::Interval_d(0, math::kInfinity), rec)) {
-    auto direction = math::Vec3::RandomOnHemisphere(rec.normal_);
-    return 0.5 * RayColour(math::Ray(rec.point_, direction), world);
+  if (world.Hit(r, math::Interval_d(0.001, math::kInfinity), rec)) {
+    auto direction = rec.normal_ + math::Vec3::RandomUnitVector();
+    return 0.5 * RayColour(math::Ray(rec.point_, direction), depth - 1, world);
   }
 
   math::Vec3 unit_direction = r.direction().unit_vector();
   auto a = 0.5 * (unit_direction.y() + 1.0);
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +
-         a * image::PixelF64(0.5, 0.7, 1.0);
+         a * image::PixelF64(1, 0.5, 0.5);
 }
 
 }  // namespace polaris::scene
