@@ -15,6 +15,8 @@ class PixelF64 {
  public:
   PixelF64() : r(0.0f), g(0.0f), b(0.0f) {}
   PixelF64(double _r, double _g, double _b) : r(_r), g(_g), b(_b) {}
+  // Allow constructing a PixelF64 directly from a math::Vec3 (x->r, y->g, z->b)
+  PixelF64(const polaris::math::Vec3& v) : r(v.x()), g(v.y()), b(v.z()) {}
 
   double R() const { return r; }
   double G() const { return g; }
@@ -27,6 +29,12 @@ class PixelF64 {
   PixelF64& operator-=(const PixelF64& o) { r -= o.r; g -= o.g; b -= o.b; return *this; }
   PixelF64& operator*=(const PixelF64& o) { r *= o.r; g *= o.g; b *= o.b; return *this; }
   PixelF64& operator/=(const PixelF64& o) { r /= o.r; g /= o.g; b /= o.b; return *this; }
+
+  // Interop with math::Vec3 (component-wise operations)
+  PixelF64& operator+=(const polaris::math::Vec3& v) { r += v.x(); g += v.y(); b += v.z(); return *this; }
+  PixelF64& operator-=(const polaris::math::Vec3& v) { r -= v.x(); g -= v.y(); b -= v.z(); return *this; }
+  PixelF64& operator*=(const polaris::math::Vec3& v) { r *= v.x(); g *= v.y(); b *= v.z(); return *this; }
+  PixelF64& operator/=(const polaris::math::Vec3& v) { r /= v.x(); g /= v.y(); b /= v.z(); return *this; }
 
   PixelF64& operator+=(double s) { r += s; g += s; b += s; return *this; }
   PixelF64& operator-=(double s) { r -= s; g -= s; b -= s; return *this; }
@@ -41,6 +49,11 @@ class PixelF64 {
   PixelF64 operator*(const PixelF64& o) const { PixelF64 t = *this; t *= o; return t; }
   PixelF64 operator/(const PixelF64& o) const { PixelF64 t = *this; t /= o; return t; }
 
+  PixelF64 operator+(const polaris::math::Vec3& v) const { PixelF64 t = *this; t += v; return t; }
+  PixelF64 operator-(const polaris::math::Vec3& v) const { PixelF64 t = *this; t -= v; return t; }
+  PixelF64 operator*(const polaris::math::Vec3& v) const { PixelF64 t = *this; t *= v; return t; }
+  PixelF64 operator/(const polaris::math::Vec3& v) const { PixelF64 t = *this; t /= v; return t; }
+
   PixelF64 operator+(double s) const { PixelF64 t = *this; t += s; return t; }
   PixelF64 operator-(double s) const { PixelF64 t = *this; t -= s; return t; }
   PixelF64 operator*(double s) const { PixelF64 t = *this; t *= s; return t; }
@@ -49,8 +62,15 @@ class PixelF64 {
   friend PixelF64 operator*(double s, const PixelF64& p) { return p * s; }
   friend PixelF64 operator+(double s, const PixelF64& p) { return p + s; }
 
+  // Symmetric free operators with Vec3 on the left-hand side
+  friend PixelF64 operator+(const polaris::math::Vec3& v, const PixelF64& p) { return p + v; }
+  friend PixelF64 operator*(const polaris::math::Vec3& v, const PixelF64& p) { return p * v; }
+  friend PixelF64 operator-(const polaris::math::Vec3& v, const PixelF64& p) { return PixelF64(v.x() - p.r, v.y() - p.g, v.z() - p.b); }
+  friend PixelF64 operator/(const polaris::math::Vec3& v, const PixelF64& p) { return PixelF64(v.x() / p.r, v.y() / p.g, v.z() / p.b); }
+
   bool operator==(const PixelF64& o) const { return r == o.r && g == o.g && b == o.b; }
   bool operator!=(const PixelF64& o) const { return !(*this == o); }
+
   // clang-format on
 
  private:

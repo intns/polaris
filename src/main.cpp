@@ -1,30 +1,19 @@
 #include <image/PPM.hpp>
 #include <iostream>
+#include <math/common.hpp>
 #include <math/ray.hpp>
+#include <scene/hittable.hpp>
+#include <scene/hittable_list.hpp>
+#include <scene/objects/sphere.hpp>
 
 using namespace polaris;
 
 namespace {
-
-double hit_sphere(const math::Vec3& center, double radius, const math::Ray& r) {
-  auto oc = center - r.origin();
-  auto a = r.direction().length_squared();
-  auto h = r.direction().dot(oc);
-  auto c = oc.length_squared() - radius * radius;
-  auto discriminant = h * h - a * c;
-
-  if (discriminant < 0) {
-    return -1.0;
-  } else {
-    return (h - std::sqrt(discriminant)) / a;
-  }
-}
-
-image::PixelF64 ray_color(const math::Ray& r) {
-  auto t = hit_sphere(math::Vec3(0, 0, -1), 0.75, r);
-  if (t > 0.0) {
-    auto N = (r.at(t) - math::Vec3{0, 0, -1}).unit_vector();
-    return 0.5 * image::PixelF64(N.x() + 1, N.y() + 1, N.z() + 1);
+image::PixelF64 ray_color(const math::Ray& r, const scene::Hittable& world) {
+  scene::HitRecord rec;
+  if (world.Hit(r, 0.001, math::kInfinity, rec)) {
+    auto p = image::PixelF64(1.0, 1.0, 1.0);
+    return 0.5 * (p + rec.normal_);
   }
 
   math::Vec3 unit_direction = r.direction().unit_vector();
@@ -72,6 +61,13 @@ int main(int argc, char** argv) {
   auto pixel00_loc =
       viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+  scene::HittableList world;
+  {
+    using scene::objects::Sphere;
+    world.Add(std::make_shared<Sphere>(math::Vec3(0, 0, -1), 0.5));
+    world.Add(std::make_shared<Sphere>(math::Vec3(0, -100.5, -1), 100));
+  }
+
   image::PPM ppm(image_width, image_height);
   for (int j = 0; j < image_height; j++) {
     for (int i = 0; i < image_width; i++) {
@@ -81,7 +77,7 @@ int main(int argc, char** argv) {
       auto ray_direction = pixel_center - camera_pos;
 
       math::Ray r(camera_pos, ray_direction);
-      ppm.Set(i, j, ray_color(r));
+      ppm.Set(i, j, ray_color(r, world));
     }
   }
 
