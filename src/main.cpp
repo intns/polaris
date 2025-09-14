@@ -6,6 +6,8 @@
 #include <scene/objects/Sphere.hpp>
 #include <string>
 
+#include "scene/material/Dielectric.hpp"
+
 using namespace polaris;
 
 namespace {
@@ -30,9 +32,11 @@ int main(int argc, char** argv) {
     auto material_center =
         std::make_shared<Lambertian>(image::PixelF64(0.1, 0.2, 0.5));
     auto material_left =
-        std::make_shared<Metal>(image::PixelF64(0.8, 0.8, 0.8));
+        std::make_shared<Dielectric>(1.50);
+    auto material_bubble =
+        std::make_shared<Dielectric>(1.00 / 1.50);
     auto material_right =
-        std::make_shared<Metal>(image::PixelF64(0.8, 0.6, 0.2));
+        std::make_shared<Metal>(image::PixelF64(0.8, 0.6, 0.2), 1.0);
 
     world.Add(std::make_shared<Sphere>(math::Vec3(0.0, -100.5, -1.0), 100.0,
                                        material_ground));
@@ -40,6 +44,8 @@ int main(int argc, char** argv) {
                                        material_center));
     world.Add(std::make_shared<Sphere>(math::Vec3(-1.0, 0.0, -1.0), 0.5,
                                        material_left));
+    world.Add(std::make_shared<Sphere>(math::Vec3(-1.0, 0.0, -1.0), 0.4,
+                                       material_bubble));
     world.Add(std::make_shared<Sphere>(math::Vec3(1.0, 0.0, -1.0), 0.5,
                                        material_right));
   }
@@ -58,6 +64,7 @@ int main(int argc, char** argv) {
 
   scene::Camera cam(settings);
   cam.Render(world);
-  cam.Write("out.bmp");
+  const auto output_file_name = settings.output_format_ == image::FileFormat::BMP ? "out.bmp" : "out.ppm";
+  cam.Write(output_file_name);
   return 0;
 }

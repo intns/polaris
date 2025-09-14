@@ -40,7 +40,9 @@ void Camera::Initialise() {
 }
 
 void Camera::Write(const std::string& filename) {
-  std::ofstream f(filename, std::ios::binary);
+  auto file_mode = settings_.output_format_ == image::FileFormat::BMP ? std::ios::binary : std::ios::out;
+
+  std::ofstream f(filename, file_mode);
   if (!f.is_open()) {
     return;
   }

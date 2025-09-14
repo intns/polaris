@@ -11,19 +11,21 @@ namespace polaris::scene::material {
 
 class Metal : public Material {
  public:
-  Metal(const image::PixelF64& albedo) : albedo_(albedo) {}
+  Metal(const image::PixelF64& albedo, double fuzz) : albedo_(albedo), fuzz_(fuzz) {}
 
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,
                image::PixelF64& attenuation,
                math::Ray& scattered) const noexcept override {
     auto reflected = in.direction().Reflect(info.normal_);
+    reflected = reflected.Unit() + (fuzz_ * math::Vec3::RandomUnitVector());
     scattered = math::Ray(info.point_, reflected);
     attenuation = albedo_;
-    return true;
+    return (scattered.direction().Dot(info.normal_) > 0);
   }
 
  private:
   image::PixelF64 albedo_;
+  double fuzz_;
 };
 
 }  // namespace polaris::scene::material

@@ -103,6 +103,14 @@ class Vec3 {
     return *this - 2 * Dot(n) * n;
   }
 
+  [[nodiscard]] Vec3 Refract(const Vec3& n, double etai_over_etat) const {
+    const auto& uv = *this;
+    auto cos_theta = std::fmin((-uv).Dot(n), 1.0);
+    Vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
+    Vec3 r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.LengthSquared())) * n;
+    return r_out_perp + r_out_parallel;
+  }
+
   [[nodiscard]] bool NearZero() const {
     constexpr auto s = 1e-8;
     return LengthSquared() < (s * s);

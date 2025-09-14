@@ -53,7 +53,7 @@ void FrameBuffer::WriteAsPPM(std::ofstream& out) {
 
   for (size_t y = 0; y < height_; ++y) {
     for (size_t x = 0; x < width_; ++x) {
-      out << data_[y * width_ + x];
+      out << data_[y * width_ + x] << ' ';
     }
   }
 
