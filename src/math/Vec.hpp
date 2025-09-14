@@ -80,17 +80,17 @@ class Vec3 {
             e[0] * v.e[1] - e[1] * v.e[0]};
   }
 
-  [[nodiscard]] inline Vec3 Unit() const { return *this / Length(); }
+  [[nodiscard]] Vec3 Unit() const { return *this / Length(); }
 
   // Thanks GPT
-  [[nodiscard]] static inline Vec3 RandomUnitVector() {
+  [[nodiscard]] static Vec3 RandomUnitVector() {
     auto Z = RandomDouble(-1, 1);
     auto a = RandomDouble(0, 2 * std::numbers::pi);
     auto r = std::sqrt(1 - Z * Z);
     return {r * std::cos(a), r * std::sin(a), Z};
   }
 
-  [[nodiscard]] static inline Vec3 RandomOnHemisphere(const Vec3& normal) {
+  [[nodiscard]] static Vec3 RandomOnHemisphere(const Vec3& normal) {
     const auto on_unit_sphere = RandomUnitVector();
     if (on_unit_sphere.Dot(normal) > 0.0) {
       return on_unit_sphere;
@@ -99,17 +99,26 @@ class Vec3 {
     }
   }
 
-  friend inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
+  [[nodiscard]] Vec3 Reflect(const Vec3& n) const {
+    return *this - 2 * Dot(n) * n;
+  }
+
+  [[nodiscard]] bool NearZero() const {
+    constexpr auto s = 1e-8;
+    return LengthSquared() < (s * s);
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const Vec3& v) {
     return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
   }
 
   // clang-format off
-  friend inline Vec3 operator+(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]}; }
-  friend inline Vec3 operator-(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]}; }
-  friend inline Vec3 operator*(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]}; }
-  friend inline Vec3 operator*(double t, const Vec3& v) noexcept { return {t * v.e[0], t * v.e[1], t * v.e[2]}; }
-  friend inline Vec3 operator*(const Vec3& v, double t) noexcept { return t * v; }
-  friend inline Vec3 operator/(const Vec3& v, double t) noexcept { return (1 / t) * v; }
+  friend  Vec3 operator+(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]}; }
+  friend  Vec3 operator-(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]}; }
+  friend  Vec3 operator*(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]}; }
+  friend  Vec3 operator*(double t, const Vec3& v) noexcept { return {t * v.e[0], t * v.e[1], t * v.e[2]}; }
+  friend  Vec3 operator*(const Vec3& v, double t) noexcept { return t * v; }
+  friend  Vec3 operator/(const Vec3& v, double t) noexcept { return (1 / t) * v; }
   // clang-format on
 };
 }  // namespace polaris::math

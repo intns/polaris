@@ -1,6 +1,7 @@
 #include <chrono>
 #include <math/Common.hpp>
 #include <scene/Camera.hpp>
+#include <scene/material/Material.hpp>
 #include <stdexcept>
 
 namespace polaris::scene {
@@ -56,9 +57,9 @@ void Camera::Render(const Hittable& world) {
         ambient_col += RayColour(GetRayFor(x, y), settings_.max_depth_, world);
       }
 
-      ambient_col *= pixel_samples_scale_;
-
-      frame_buffer_.Set(x, y, static_cast<image::PixelU8>(ambient_col));
+      frame_buffer_.Set(
+          x, y,
+          static_cast<image::PixelU8>(ambient_col * pixel_samples_scale_));
     }
   }
 }
@@ -85,14 +86,19 @@ image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
 
   scene::HitInfo rec;
   if (world.Hit(r, math::Interval(0.001, math::kInfinity), rec)) {
-    auto direction = rec.normal_ + math::Vec3::RandomUnitVector();
-    return 0.5 * RayColour(math::Ray(rec.point_, direction), depth - 1, world);
+    math::Ray scattered;
+    image::PixelF64 attenuation;
+    if (rec.material_->Scatter(r, rec, attenuation, scattered)) {
+      return attenuation * RayColour(scattered, depth - 1, world);
+    }
+
+    return {0, 0, 0};
   }
 
   math::Vec3 unit_direction = r.direction().Unit();
   auto a = 0.5 * (unit_direction.Y() + 1.0);
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +
-         a * image::PixelF64(1, 0.5, 0.5);
+         a * image::PixelF64(1, 1, 1);
 }
 
 }  // namespace polaris::scene

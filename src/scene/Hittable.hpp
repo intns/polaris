@@ -4,6 +4,8 @@
 #include <math/Interval.hpp>
 #include <math/Ray.hpp>
 #include <math/Vec.hpp>
+#include <memory>
+#include <scene/material/Material.hpp>
 
 namespace polaris::scene {
 
@@ -12,6 +14,7 @@ struct HitInfo {
   math::Vec3 normal_;
   double t_ = 0.0;
   bool front_face_ = false;
+  std::shared_ptr<material::Material> material_;
 
   void SetNormal(const math::Ray& r, const math::Vec3& outward_normal) {
     if (r.direction().Dot(outward_normal) < 0) {
