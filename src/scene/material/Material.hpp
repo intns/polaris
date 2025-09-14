@@ -18,15 +18,25 @@ struct HitInfo;
 namespace polaris::scene::material {
 class Material {
  public:
+  Material() = default;
+  Material(const Material&) = default;
+  Material& operator=(const Material&) = default;
+  Material(Material&&) = default;
+  Material& operator=(Material&&) = default;
   virtual ~Material() = default;
 
   virtual bool Scatter(const math::Ray& in, const scene::HitInfo& hit,
                        image::PixelF64& attenuation,
                        math::Ray& scattered) const noexcept {
+    (void)in;
+    (void)hit;
+    (void)attenuation;
+    (void)scattered;
     return false;
   }
 
   virtual image::PixelF64 Emitted(const scene::HitInfo& hit) const noexcept {
+    (void)hit;
     return {0, 0, 0};
   }
 

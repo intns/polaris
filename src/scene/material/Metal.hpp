@@ -12,6 +12,7 @@ namespace polaris::scene::material {
 class Metal : public Material {
  public:
   Metal(const image::PixelF64& albedo, double fuzz) : albedo_(albedo), fuzz_(fuzz) {}
+  ~Metal() override = default;
 
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,
                image::PixelF64& attenuation,
@@ -24,8 +25,8 @@ class Metal : public Material {
   }
 
  private:
-  image::PixelF64 albedo_;
-  double fuzz_;
+  image::PixelF64 albedo_{};
+  double fuzz_ = 0.0;
 };
 
 }  // namespace polaris::scene::material

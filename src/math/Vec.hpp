@@ -94,10 +94,10 @@ class Vec3 {
     const auto on_unit_sphere = RandomUnitVector();
     if (on_unit_sphere.Dot(normal) > 0.0) {
       return on_unit_sphere;
-    } else {
+    }
+
       return -on_unit_sphere;
     }
-  }
 
   [[nodiscard]] Vec3 Reflect(const Vec3& n) const {
     return *this - 2 * Dot(n) * n;

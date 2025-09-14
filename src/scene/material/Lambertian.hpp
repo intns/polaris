@@ -11,7 +11,8 @@ namespace polaris::scene::material {
 
 class Lambertian : public Material {
  public:
-  Lambertian(const image::PixelF64& albedo) : albedo_(albedo) {}
+  explicit Lambertian(const image::PixelF64& albedo) : albedo_(albedo) {}
+  ~Lambertian() override = default;
 
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,
                image::PixelF64& attenuation,

@@ -17,9 +17,9 @@ class Sphere : public Hittable {
                          HitInfo& rec) const override;
 
  private:
-  math::Vec3 center_;
-  double radius_;
-  std::shared_ptr<material::Material> material_;
+  math::Vec3 center_ {};
+  double radius_ = 0.0;
+  std::shared_ptr<material::Material> material_ {};
 };
 }  // namespace polaris::scene::objects
 

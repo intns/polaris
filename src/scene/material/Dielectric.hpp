@@ -9,6 +9,7 @@ namespace polaris::scene::material {
 class Dielectric : public Material {
 public:
   Dielectric(double refraction_index) : refraction_index_(refraction_index) {}
+  ~Dielectric() override = default;
 
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,
                  image::PixelF64& attenuation,
@@ -17,17 +18,18 @@ public:
     double ri = info.front_face_ ? (1.0 / refraction_index_) : refraction_index_;
 
     math::Vec3 unit_direction = in.direction().Unit();
-    double cos_theta = std::fmin((-unit_direction).Dot(info.normal_), 1.0);
-    double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+    const double cos_theta =
+        std::fmin((-unit_direction).Dot(info.normal_), 1.0);
+    const double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
 
-    bool cannot_refract = ri * sin_theta > 1.0;
+    const bool cannot_refract = ri * sin_theta > 1.0;
     math::Vec3 direction;
 
-    if (cannot_refract || Reflectance(cos_theta, ri) > math::RandomDouble())
+    if (cannot_refract || Reflectance(cos_theta, ri) > math::RandomDouble()) {
       direction = unit_direction.Reflect(info.normal_);
-    else
+    } else {
       direction = unit_direction.Refract(info.normal_, ri);
-
+    }
     scattered = math::Ray(info.point_, direction);
     return true;
   }

@@ -1,53 +1,51 @@
-#include <chrono>
+#include <filesystem>
 #include <math/Common.hpp>
 #include <scene/Camera.hpp>
 #include <scene/material/Material.hpp>
-#include <stdexcept>
 
 namespace polaris::scene {
 
-void Camera::Initialise() {
+Camera::Camera(const CameraSettings& settings) : settings_(settings) {
   const auto image_width = settings_.image_width;
-
   image_height_ = static_cast<int>(image_width / settings_.aspect_ratio);
   image_height_ = std::max(image_height_, 1);
-
   frame_buffer_.Assign(settings_.output_format_, image_width, image_height_);
 
   pixel_samples_scale_ = 1.0 / settings_.samples_per_pixel;
 
-  center_ = math::Vec3(0, 0, 0);
-
-  // Determine viewport dimensions.
-  auto focal_length = 1.0;
-  auto viewport_height = 2.0;
-  auto viewport_width =
-      viewport_height * (static_cast<double>(image_width) / image_height_);
-
-  // U = top left -> top right   | going right
-  // V = top left -> bottom left | going downwards
-  auto viewport_u = math::Vec3(viewport_width, 0, 0);
-  auto viewport_v = math::Vec3(0, -viewport_height, 0);
-
-  // Per-pixel offsets in U and V directions
-  pixel_delta_u_ = viewport_u / image_width;
-  pixel_delta_v_ = viewport_v / image_height_;
-
-  auto viewport_upper_left = center_ - math::Vec3(0, 0, focal_length) -
-                             viewport_u / 2 - viewport_v / 2;
-
-  pixel00_loc_ = viewport_upper_left + 0.5 * (pixel_delta_u_ + pixel_delta_v_);
+  SetTarget({0, 0, 0}, math::Vec3{0, 0, -1});
 }
 
-void Camera::Write(const std::string& filename) {
-  auto file_mode = settings_.output_format_ == image::FileFormat::BMP ? std::ios::binary : std::ios::out;
+void Camera::SetTarget(const math::Vec3& pos,
+                       std::optional<math::Vec3> opt_lookat) {
+  lookat_ = opt_lookat.has_value() ? opt_lookat.value() : math::Vec3(0, 0, -1);
+  position_ = pos;
+  center_ = position_;
 
-  std::ofstream f(filename, file_mode);
-  if (!f.is_open()) {
-    return;
-  }
+  // Determine viewport dimensions.
+  auto focal_length = (position_ - lookat_).Length();
+  auto theta = math::DegreesToRadians(settings_.fov);
+  auto h = std::tan(theta / 2);
+  auto viewport_height = 2 * h * focal_length;
+  auto viewport_width =
+      viewport_height *
+      (static_cast<double>(settings_.image_width) / image_height_);
 
-  frame_buffer_.Write(f);
+  w = (position_ - lookat_).Unit();
+  u = up_.Cross(w).Unit();
+  v = w.Cross(u);
+
+  auto viewport_u = viewport_width * u;
+  auto viewport_v = viewport_height * -v;
+
+  // Per-pixel offsets in U and V directions
+  pixel_delta_u_ = viewport_u / settings_.image_width;
+  pixel_delta_v_ = viewport_v / image_height_;
+
+  auto viewport_upper_left =
+      center_ - (focal_length * w) - viewport_u / 2 - viewport_v / 2;
+
+  pixel00_loc_ = viewport_upper_left + 0.5 * (pixel_delta_u_ + pixel_delta_v_);
 }
 
 void Camera::Render(const Hittable& world) {
@@ -64,6 +62,30 @@ void Camera::Render(const Hittable& world) {
           static_cast<image::PixelU8>(ambient_col * pixel_samples_scale_));
     }
   }
+}
+
+void Camera::Write(const std::string& filename) {
+  std::filesystem::path file_path(filename);
+  std::ios_base::openmode file_mode = std::ios::out;
+
+  switch (settings_.output_format_) {
+    case image::FileFormat::BMP:
+      file_path.replace_extension(".bmp");
+      file_mode |= std::ios::binary;
+      break;
+    case image::FileFormat::PPM:
+      file_path.replace_extension(".ppm");
+      break;
+    default:
+      return;  // Unsupported format
+  }
+
+  std::ofstream f(file_path, file_mode);
+  if (!f.is_open()) {
+    return;
+  }
+
+  frame_buffer_.Write(f);
 }
 
 math::Ray Camera::GetRayFor(int X, int Y) const {
@@ -99,8 +121,9 @@ image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
 
   math::Vec3 unit_direction = r.direction().Unit();
   auto a = 0.5 * (unit_direction.Y() + 1.0);
+  // Blue-ish sky gradient from white at the horizon to light blue at the top
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +
-         a * image::PixelF64(1, 1, 1);
+         a * image::PixelF64(0.5, 0.7, 1.0);
 }
 
 }  // namespace polaris::scene

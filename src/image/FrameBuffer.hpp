@@ -1,9 +1,10 @@
 #ifndef POLARIS_IMAGE_FRAMEBUFFER_HPP
 #define POLARIS_IMAGE_FRAMEBUFFER_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <image/Pixel.hpp>
-#include <vector>
 
 namespace polaris::image {
 enum class FileFormat : std::uint8_t {
