@@ -5,15 +5,15 @@
 
 namespace polaris::math {
 class Ray;
-}
+} // namespace polaris::math
 
 namespace polaris::image {
 class PixelF64;
-}
+} // namespace polaris::image
 
 namespace polaris::scene {
 struct HitInfo;
-}
+} // namespace polaris::scene
 
 namespace polaris::scene::material {
 class Material {

@@ -14,6 +14,8 @@ struct HitInfo {
   math::Vec3 point_;
   math::Vec3 normal_;
   double t_ = 0.0;
+  double u_ = 0.0;
+  double v_ = 0.0;
   bool front_face_ = false;
   std::shared_ptr<material::Material> material_;
 

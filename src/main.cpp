@@ -9,6 +9,8 @@
 #include <scene/objects/Sphere.hpp>
 #include <string>
 
+#include "scene/texture/CheckerTexture.hpp"
+
 using namespace polaris;
 
 namespace {
@@ -51,8 +53,8 @@ int main(int argc, char** argv) {
 
     // Book cover image test
 
-    auto ground_material = std::make_shared<Lambertian>(image::PixelF64(0.5, 0.5, 0.5));
-    world.Add(std::make_shared<Sphere>(math::Vec3(0,-1000,0), 1000, ground_material));
+    auto checker = std::make_shared<scene::texture::CheckerTexture>(0.32, image::PixelF64(0.2, 0.3, 0.1), image::PixelF64(0.9, 0.9, 0.9));
+    world.Add(std::make_shared<Sphere>(math::Vec3(0,-1000,0), 1000, std::make_shared<Lambertian>(checker)));
 
     for (int a = -11; a < 11; a++) {
       for (int b = -11; b < 11; b++) {

@@ -6,12 +6,17 @@
 #include <math/Vec.hpp>
 #include <scene/Hittable.hpp>
 #include <scene/material/Material.hpp>
+#include <scene/texture/Texture.hpp>
+#include <scene/texture/SolidColour.hpp>
 
 namespace polaris::scene::material {
 
 class Lambertian : public Material {
  public:
-  explicit Lambertian(const image::PixelF64& albedo) : albedo_(albedo) {}
+  explicit Lambertian(const image::PixelF64& albedo)
+    : texture_(std::make_shared<texture::SolidColour>(albedo)) {}
+  explicit Lambertian(std::shared_ptr<texture::Texture> texture)
+    : texture_(texture) {}
   ~Lambertian() override = default;
 
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,
@@ -24,14 +29,13 @@ class Lambertian : public Material {
     }
 
     scattered = math::Ray(info.point_, scatter_direction, in.Time());
-    attenuation = albedo_;
+    attenuation = texture_->Value(info.u_, info.v_, info.point_);
     return true;
   }
 
  private:
-  image::PixelF64 albedo_{};
+  std::shared_ptr<texture::Texture> texture_;
 };
-
 }  // namespace polaris::scene::material
 
 #endif
