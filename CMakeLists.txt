@@ -31,7 +31,10 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/src")
-target_link_libraries(${PROJECT_NAME} tbb)
+
+if(UNIX AND NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} tbb)
+endif()
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive- /Zc:preprocessor /utf-8)
