@@ -28,23 +28,68 @@ int main(int argc, char** argv) {
     using namespace scene::objects;
     using scene::material::Dielectric;
     using scene::material::Lambertian;
+    using scene::material::Material;
     using scene::material::Metal;
 
-    auto material_ground =
-        std::make_shared<Lambertian>(image::PixelF64(0.8, 0.8, 0.0));
-    auto material_right =
-        std::make_shared<Lambertian>(image::PixelF64(0.1, 0.2, 0.5));
-    auto material_left = std::make_shared<Dielectric>(2.50);
-    auto material_bubble = std::make_shared<Dielectric>(1.00 / 2.0);
-    auto material_center =
-        std::make_shared<Metal>(image::PixelF64(0.9, 0.9, 0.9), 0.001);
+    // original image
 
-    world.Add(
-        CreateSphere(math::Vec3(0.0, -100.5, -1.0), 100.0, material_ground));
-    world.Add(CreateSphere(math::Vec3(0.0, 0.0, -1.2), 0.5, material_center));
-    world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.5, material_left));
-    world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
-    world.Add(CreateSphere(math::Vec3(1.0, 0.0, -1.0), 0.5, material_right));
+    // auto material_ground =
+    //     std::make_shared<Lambertian>(image::PixelF64(0.8, 0.8, 0.0));
+    // auto material_right =
+    //     std::make_shared<Lambertian>(image::PixelF64(0.1, 0.2, 0.5));
+    // auto material_left = std::make_shared<Dielectric>(2.50);
+    // auto material_bubble = std::make_shared<Dielectric>(1.00 / 2.0);
+    // auto material_center =
+    //     std::make_shared<Metal>(image::PixelF64(0.9, 0.9, 0.9), 0.001);
+    //
+    // world.Add(
+    //     CreateSphere(math::Vec3(0.0, -100.5, -1.0), 100.0, material_ground));
+    // world.Add(CreateSphere(math::Vec3(0.0, 0.0, -1.2), 0.5, material_center));
+    // world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.5, material_left));
+    // world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
+    // world.Add(CreateSphere(math::Vec3(1.0, 0.0, -1.0), 0.5, material_right));
+
+    // Book cover image test
+
+    auto ground_material = std::make_shared<Lambertian>(image::PixelF64(0.5, 0.5, 0.5));
+    world.Add(std::make_shared<Sphere>(math::Vec3(0,-1000,0), 1000, ground_material));
+
+    for (int a = -11; a < 11; a++) {
+      for (int b = -11; b < 11; b++) {
+        auto choose_mat = math::RandomDouble();
+        const math::Vec3 center(a + 0.9 * math::RandomDouble(), 0.2, b + 0.9 * math::RandomDouble());
+
+        if ((center - math::Vec3(4, 0.2, 0)).Length() > 0.9) {
+          std::shared_ptr<Material> sphere_material;
+
+          if (choose_mat < 0.8) {
+            // diffuse
+            auto albedo = image::PixelF64(math::RandomDouble(), math::RandomDouble(), math::RandomDouble()) * image::PixelF64(math::RandomDouble(), math::RandomDouble(), math::RandomDouble());
+            sphere_material = std::make_shared<Lambertian>(albedo);
+            world.Add(std::make_shared<Sphere>(center, 0.2, sphere_material));
+          } else if (choose_mat < 0.95) {
+            // metal
+            auto albedo = image::PixelF64(math::RandomDouble(), math::RandomDouble(), math::RandomDouble());
+            auto fuzz = math::RandomDouble(0, 0.5);
+            sphere_material = std::make_shared<Metal>(albedo, fuzz);
+            world.Add(make_shared<Sphere>(center, 0.2, sphere_material));
+          } else {
+            // glass
+            sphere_material = std::make_shared<Dielectric>(1.5);
+            world.Add(std::make_shared<Sphere>(center, 0.2, sphere_material));
+          }
+        }
+      }
+    }
+
+    auto material1 = std::make_shared<Dielectric>(1.5);
+    world.Add(std::make_shared<Sphere>(math::Vec3(0, 1, 0), 1.0, material1));
+
+    auto material2 = std::make_shared<Lambertian>(image::PixelF64(0.4, 0.2, 0.1));
+    world.Add(std::make_shared<Sphere>(math::Vec3(-4, 1, 0), 1.0, material2));
+
+    auto material3 = std::make_shared<Metal>(image::PixelF64(0.7, 0.6, 0.5), 0.0);
+    world.Add(make_shared<Sphere>(math::Vec3(4, 1, 0), 1.0, material3));
   }
   world = scene::HittableList(std::make_shared<math::BVHNode>(world));
 
@@ -53,7 +98,9 @@ int main(int argc, char** argv) {
   settings.image_width = 1280;
   settings.samples_per_pixel = 100;
   settings.max_depth_ = 10;
-  settings.fov = 70.0;
+  settings.fov = 20.0;
+  settings.defocus_angle = 0.6;
+  settings.focus_dist = 1.0;
 
 #ifdef _WIN32
   settings.output_format_ = image::FileFormat::BMP;
@@ -62,7 +109,7 @@ int main(int argc, char** argv) {
 #endif
 
   scene::Camera cam(settings);
-  cam.SetTarget({0, 0, 0}, math::Vec3{0, 0, -1});
+  cam.SetTarget({13, 2, 3}, math::Vec3{0, 0, 0});
   cam.Render(world);
   cam.Write("out");
   return 0;

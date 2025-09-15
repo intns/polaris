@@ -82,6 +82,14 @@ class Vec3 {
 
   [[nodiscard]] Vec3 Unit() const { return *this / Length(); }
 
+  [[nodiscard]] static Vec3 RandomInUnitDisk() {
+    while (true) {
+      auto p = Vec3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0);
+      if (p.LengthSquared() < 1)
+        return p;
+    }
+  }
+
   // Thanks GPT
   [[nodiscard]] static Vec3 RandomUnitVector() {
     auto Z = RandomDouble(-1, 1);

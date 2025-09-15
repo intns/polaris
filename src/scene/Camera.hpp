@@ -13,6 +13,8 @@ struct CameraSettings {
   double aspect_ratio = 16.0 / 9.0;
   int image_width = 400;
   double fov = 90;
+  double defocus_angle = 0;
+  double focus_dist = 10;
 
   // Rendering
   std::uint32_t samples_per_pixel =
@@ -35,7 +37,9 @@ class Camera {
   void SetTarget(const math::Vec3& pos, std::optional<math::Vec3> lookat);
 
  private:
-    math::Ray GetRayFor(double u_norm, double v_norm) const;
+  math::Ray GetRayFor(double u_norm, double v_norm) const;
+
+  math::Vec3 DefocusDiskSample() const;
 
   image::PixelF64 RayColour(const math::Ray& r, std::uint32_t depth,
                             const Hittable& world);
@@ -57,6 +61,9 @@ class Camera {
   math::Vec3 lookat_{0, 0, -1};
   const math::Vec3 up_{0, 1, 0};
   math::Vec3 u{}, v{}, w{};  // Basis vectors
+
+  math::Vec3 defocus_disk_u_{};
+  math::Vec3 defocus_disk_v_{};
 };
 
 }  // namespace polaris::scene

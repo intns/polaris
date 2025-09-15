@@ -27,10 +27,9 @@ void Camera::SetTarget(const math::Vec3& pos,
   center_ = position_;
 
   // Determine viewport dimensions.
-  auto focal_length = (position_ - lookat_).Length();
   auto theta = math::DegreesToRadians(settings_.fov);
   auto h = std::tan(theta / 2);
-  auto viewport_height = 2 * h * focal_length;
+  auto viewport_height = 2 * h * settings_.focus_dist;
   auto viewport_width =
       viewport_height *
       (static_cast<double>(settings_.image_width) / image_height_);
@@ -47,9 +46,13 @@ void Camera::SetTarget(const math::Vec3& pos,
   pixel_delta_v_ = viewport_v / image_height_;
 
   auto viewport_upper_left =
-      center_ - (focal_length * w) - viewport_u / 2 - viewport_v / 2;
+      center_ - (settings_.focus_dist * w) - viewport_u / 2 - viewport_v / 2;
 
   pixel00_loc_ = viewport_upper_left + 0.5 * (pixel_delta_u_ + pixel_delta_v_);
+
+  auto defocus_radius = settings_.focus_dist * std::tan(math::DegreesToRadians(settings_.defocus_angle / 2));
+  defocus_disk_u_ = u * defocus_radius;
+  defocus_disk_v_ = v * defocus_radius;
 }
 
 void Camera::Render(const Hittable& world) {
@@ -145,8 +148,15 @@ math::Ray Camera::GetRayFor(double u_norm, double v_norm) const {
 
   const auto pixel_sample = pixel00_loc_ + pixel_offset_u + pixel_offset_v;
 
+  const auto ray_origin = (settings_.defocus_angle <= 0) ? center_ : DefocusDiskSample();
   const auto ray_direction = pixel_sample - center_;
-  return {center_, ray_direction};
+  return {ray_origin, ray_direction};
+}
+
+math::Vec3 Camera::DefocusDiskSample() const {
+  // return a random point in the camera defocus disk.
+  auto p = math::Vec3::RandomInUnitDisk();
+  return center_ + (p[0] * defocus_disk_u_) + (p[1] * defocus_disk_v_);
 }
 
 image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
