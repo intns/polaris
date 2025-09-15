@@ -1,6 +1,7 @@
 #ifndef POLARIS_SCENE_HITTABLE_HPP
 #define POLARIS_SCENE_HITTABLE_HPP
 
+#include <math/AABB.hpp>
 #include <math/Interval.hpp>
 #include <math/Ray.hpp>
 #include <math/Vec.hpp>
@@ -34,6 +35,8 @@ class Hittable {
   [[nodiscard]] virtual bool Hit(const math::Ray& r,
                                  const math::Interval& t_interval,
                                  HitInfo& rec) const = 0;
+
+  [[nodiscard]] virtual math::AABB GetBounds() const = 0;
 };
 
 class HittableList : public Hittable {
@@ -43,7 +46,10 @@ class HittableList : public Hittable {
 
   void Clear() { objects.clear(); }
 
-  void Add(std::shared_ptr<Hittable> object) { objects.push_back(object); }
+  void Add(std::shared_ptr<Hittable> object) {
+    objects.push_back(object);
+    bb_ = math::AABB(bb_, object->GetBounds());
+  }
 
   [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval& t_interval,
                          HitInfo& rec) const override {
@@ -63,8 +69,16 @@ class HittableList : public Hittable {
     return hit_anything;
   }
 
+  [[nodiscard]] math::AABB GetBounds() const override { return bb_; }
+
+  [[nodiscard]] const std::vector<std::shared_ptr<Hittable>>& GetObjects()
+      const {
+    return objects;
+  }
+
  private:
   std::vector<std::shared_ptr<Hittable>> objects;
+  math::AABB bb_;
 };
 
 }  // namespace polaris::scene

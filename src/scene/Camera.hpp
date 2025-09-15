@@ -20,6 +20,9 @@ struct CameraSettings {
   std::uint32_t max_depth_ = 10;  // Maximum ray bounces into the scene
   image::FileFormat output_format_ =
       image::FileFormat::BMP;  // Output image format
+
+  // Parallel rendering
+  int tile_size = 64;  // Square tile size in pixels
 };
 
 class Camera {
@@ -32,12 +35,13 @@ class Camera {
   void SetTarget(const math::Vec3& pos, std::optional<math::Vec3> lookat);
 
  private:
-  void Initialise();
-
-  math::Ray GetRayFor(int X, int Y) const;
+    math::Ray GetRayFor(double u_norm, double v_norm) const;
 
   image::PixelF64 RayColour(const math::Ray& r, std::uint32_t depth,
-                            const scene::Hittable& world);
+                            const Hittable& world);
+
+  void RenderTile(int x0, int y0, int x1, int y1, const Hittable& world,
+                  std::mt19937& rng);
 
   CameraSettings settings_;
 

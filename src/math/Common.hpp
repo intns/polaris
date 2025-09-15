@@ -33,6 +33,9 @@ inline double RandomDouble(double min, double max) {
   return distribution(generator);
 }
 
+inline int RandomInt(int min, int max) {
+  return static_cast<int>(RandomDouble(min, max + 1));
+}
 }  // namespace polaris::math
 
 #endif

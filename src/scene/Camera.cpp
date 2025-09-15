@@ -1,7 +1,11 @@
+#include <algorithm>
+#include <execution>
 #include <filesystem>
 #include <math/Common.hpp>
 #include <scene/Camera.hpp>
 #include <scene/material/Material.hpp>
+#include <thread>
+#include <vector>
 
 namespace polaris::scene {
 
@@ -49,17 +53,61 @@ void Camera::SetTarget(const math::Vec3& pos,
 }
 
 void Camera::Render(const Hittable& world) {
-  for (int y = 0; y < image_height_; y++) {
-    for (int x = 0; x < settings_.image_width; x++) {
-      // Iteratively sample the pixel colour
-      image::PixelF64 ambient_col(0.0, 0.0, 0.0);
-      for (std::uint32_t i = 0; i < settings_.samples_per_pixel; i++) {
-        ambient_col += RayColour(GetRayFor(x, y), settings_.max_depth_, world);
+  const int tile = std::max(1, settings_.tile_size);
+  const int width = settings_.image_width;
+  const int height = image_height_;
+
+  struct Tile {
+    int x0, y0, x1, y1;
+  };
+
+  std::vector<Tile> tiles;
+  for (int y = 0; y < height; y += tile) {
+    for (int x = 0; x < width; x += tile) {
+      tiles.push_back(
+          {x, y, std::min(x + tile, width), std::min(y + tile, height)});
+    }
+  }
+
+  std::atomic<size_t> next_tile{0};
+
+  std::vector<std::jthread> threads;
+  for (size_t t = 0; t < std::jthread::hardware_concurrency(); ++t) {
+    threads.emplace_back([&, seed = std::random_device{}() + t] {
+      thread_local std::mt19937 rng(seed);
+
+      size_t idx;
+      while ((idx = next_tile.fetch_add(1)) < tiles.size()) {
+        const auto& [x0, y0, x1, y1] = tiles[idx];
+        RenderTile(x0, y0, x1, y1, world, rng);
+      }
+    });
+  }
+}
+
+void Camera::RenderTile(int x0, int y0, int x1, int y1, const Hittable& world,
+                        std::mt19937& rng) {
+  std::uniform_real_distribution<> dist(0.0, 1.0);
+  const int sqrt_spp = std::sqrt(settings_.samples_per_pixel);
+  const double inv_sqrt_spp = 1.0 / sqrt_spp;
+  const double inv_width = 1.0 / (settings_.image_width - 1);
+  const double inv_height = 1.0 / (image_height_ - 1);
+
+  for (int y = y0; y < y1; ++y) {
+    for (int x = x0; x < x1; ++x) {
+      image::PixelF64 color{};
+
+      // Stratified sampling
+      for (int sy = 0; sy < sqrt_spp; ++sy) {
+        for (int sx = 0; sx < sqrt_spp; ++sx) {
+          auto u = (x + (sx + dist(rng)) * inv_sqrt_spp) * inv_width;
+          auto v = (y + (sy + dist(rng)) * inv_sqrt_spp) * inv_height;
+          color += RayColour(GetRayFor(u, v), settings_.max_depth_, world);
+        }
       }
 
       frame_buffer_.Set(
-          x, y,
-          static_cast<image::PixelU8>(ambient_col * pixel_samples_scale_));
+          x, y, static_cast<image::PixelU8>(color * pixel_samples_scale_));
     }
   }
 }
@@ -88,13 +136,12 @@ void Camera::Write(const std::string& filename) {
   frame_buffer_.Write(f);
 }
 
-math::Ray Camera::GetRayFor(int X, int Y) const {
-  const auto offset = math::Vec3(math::RandomDouble(-0.5, 0.5),
-                                 math::RandomDouble(-0.5, 0.5), 0.0);
+math::Ray Camera::GetRayFor(double u_norm, double v_norm) const {
+  const double px = u_norm * (settings_.image_width - 1);
+  const double py = v_norm * (image_height_ - 1);
 
-  // Jitter the pixels and scale them
-  const auto pixel_offset_u = (X + offset.X()) * pixel_delta_u_;
-  const auto pixel_offset_v = (Y + offset.Y()) * pixel_delta_v_;
+  const auto pixel_offset_u = px * pixel_delta_u_;
+  const auto pixel_offset_v = py * pixel_delta_v_;
 
   const auto pixel_sample = pixel00_loc_ + pixel_offset_u + pixel_offset_v;
 

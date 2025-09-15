@@ -9,16 +9,21 @@ class Ray {
  public:
   Ray() = default;
   Ray(const Vec3& origin, const Vec3& direction)
-      : origin_(origin), direction_(direction) {}
+      : origin_(origin),
+        direction_(direction),
+        inv_direction_(1.0 / direction.X(), 1.0 / direction.Y(),
+                       1.0 / direction.Z()) {}
 
   [[nodiscard]] const Vec3& origin() const { return origin_; }
   [[nodiscard]] const Vec3& direction() const { return direction_; }
+  [[nodiscard]] const Vec3& InverseDirection() const { return inv_direction_; }
 
   [[nodiscard]] Vec3 at(double t) const { return origin_ + t * direction_; }
 
  private:
   Vec3 origin_;
   Vec3 direction_;
+  Vec3 inv_direction_;
 };
 }  // namespace polaris::math
 

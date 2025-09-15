@@ -1,3 +1,4 @@
+#include <math/BVH.hpp>
 #include <math/Vec.hpp>
 #include <memory>
 #include <scene/Camera.hpp>
@@ -29,26 +30,30 @@ int main(int argc, char** argv) {
     using scene::material::Lambertian;
     using scene::material::Metal;
 
-    // auto m1 = std::make_shared<Lambertian>(image::PixelF64(0.1, 0.2, 0.5));
-    auto m2 = std::make_shared<Dielectric>(1.50);
-    auto m3 = std::make_shared<Metal>(image::PixelF64(0.8, 0.8, 0.8), 0.001);
+    auto material_ground =
+        std::make_shared<Lambertian>(image::PixelF64(0.8, 0.8, 0.0));
+    auto material_right =
+        std::make_shared<Lambertian>(image::PixelF64(0.1, 0.2, 0.5));
+    auto material_left = std::make_shared<Dielectric>(2.50);
+    auto material_bubble = std::make_shared<Dielectric>(1.00 / 2.0);
+    auto material_center =
+        std::make_shared<Metal>(image::PixelF64(0.9, 0.9, 0.9), 0.001);
 
-    world.Add(CreateSphere({0.0, -100.5, -1.0}, 100.0, m3));
-    world.Add(CreateSphere({-1.0, 0.0, -10.2}, 2, m2));
-    {
-      auto pos = math::Vec3{0.0, 0.0, -10};
-      auto sz = 10;
-      world.Add(CreateSphere(pos, sz, m2));
-    }
-    world.Add(CreateSphere({1.0, 0.0, -1.0}, 0.5, m3));
+    world.Add(
+        CreateSphere(math::Vec3(0.0, -100.5, -1.0), 100.0, material_ground));
+    world.Add(CreateSphere(math::Vec3(0.0, 0.0, -1.2), 0.5, material_center));
+    world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
+    world.Add(CreateSphere(math::Vec3(1.0, 0.0, -1.0), 0.5, material_right));
   }
+  world = scene::HittableList(std::make_shared<math::BVHNode>(world));
 
   scene::CameraSettings settings;
   settings.aspect_ratio = 16.0 / 9.0;
-  settings.image_width = 500;
-  settings.samples_per_pixel = 20;
-  settings.max_depth_ = 50;
-  settings.fov = 90.0;
+  settings.image_width = 1280;
+  settings.samples_per_pixel = 100;
+  settings.max_depth_ = 10;
+  settings.fov = 70.0;
 
 #ifdef _WIN32
   settings.output_format_ = image::FileFormat::BMP;
@@ -57,6 +62,7 @@ int main(int argc, char** argv) {
 #endif
 
   scene::Camera cam(settings);
+  cam.SetTarget({0, 0, 0}, math::Vec3{0, 0, -1});
   cam.Render(world);
   cam.Write("out");
   return 0;

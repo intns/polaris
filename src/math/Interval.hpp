@@ -18,15 +18,17 @@ class Interval {
   constexpr Interval(double min_val, double max_val) noexcept
       : min_(min_val), max_(max_val) {}
 
-  [[nodiscard]] constexpr double Min() const noexcept { return min_; }
-  [[nodiscard]] constexpr double Max() const noexcept { return max_; }
+  [[nodiscard]] constexpr double Min() const { return min_; }
+  [[nodiscard]] constexpr double Max() const { return max_; }
+
+  void SetMin(double min_val) { min_ = min_val; }
+  void SetMax(double max_val) { max_ = max_val; }
 
   [[nodiscard]] constexpr double Size() const noexcept { return max_ - min_; }
 
-  constexpr Interval& Expand(double delta) noexcept {
-    min_ -= delta;
-    max_ += delta;
-    return *this;
+  constexpr Interval Expand(double delta) noexcept {
+    auto padding = delta / 2;
+    return Interval(min_ - padding, max_ + padding);
   }
 
   [[nodiscard]] constexpr bool Surrounds(double X) const noexcept {
