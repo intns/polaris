@@ -101,6 +101,28 @@ class BVHNode : public scene::Hittable {
                       right_ ? right_->GetBounds() : left_->GetBounds());
   }
 
+  [[nodiscard]] static bool BoxCompare(const std::shared_ptr<Hittable> a,
+    const std::shared_ptr<Hittable> b, int axis_index) {
+    auto a_axis_interval = a->GetBounds().Axis(axis_index);
+    auto b_axis_interval = b->GetBounds().Axis(axis_index);
+    return a_axis_interval.Min() < b_axis_interval.Min();
+  }
+
+  [[nodiscard]] static bool BoxXCompare(const std::shared_ptr<Hittable> a,
+    const std::shared_ptr<Hittable> b) {
+    return BoxCompare(a, b, 0);
+  }
+
+  [[nodiscard]] static bool BoxYCompare(const std::shared_ptr<Hittable> a,
+    const std::shared_ptr<Hittable> b) {
+    return BoxCompare(a, b, 1);
+  }
+
+  [[nodiscard]] static bool BoxZCompare(const std::shared_ptr<Hittable> a,
+    const std::shared_ptr<Hittable> b) {
+    return BoxCompare(a, b, 2);
+  }
+
   std::shared_ptr<scene::Hittable> left_;
   std::shared_ptr<scene::Hittable> right_;
   math::AABB box_;

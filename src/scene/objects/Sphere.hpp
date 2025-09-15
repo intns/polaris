@@ -10,11 +10,25 @@
 namespace polaris::scene::objects {
 class Sphere : public Hittable {
  public:
-  Sphere(const math::Vec3& _center, double _radius,
-         std::shared_ptr<scene::material::Material> mat)
-      : center_(_center), radius_(std::fmax(0, _radius)), material_(mat) {
-    auto r = math::Vec3(radius_, radius_, radius_);
-    bb_ = math::AABB(center_ - r, center_ + r);
+  // Stationary Sphere
+  Sphere(const math::Vec3& static_centre, const double radius,
+          std::shared_ptr<material::Material> mat)
+            : center_(static_centre, math::Vec3(0, 0, 0)),
+              radius_(std::fmax(0, radius)),
+              material_(mat) {
+    auto r = math::Vec3(radius, radius, radius);
+    bb_ = math::AABB(static_centre - r, static_centre + r);
+  }
+
+  Sphere(const math::Vec3& center1, const math::Vec3& center2,
+          const double radius, std::shared_ptr<material::Material> mat)
+            : center_(center1, center2 - center1),
+              radius_(std::fmax(0, radius)),
+              material_(mat) {
+    auto r = math::Vec3(radius, radius, radius);
+    const math::AABB box1(center_.at(0) - r, center_.at(0) + r);
+    const math::AABB box2(center_.at(1) - r, center_.at(1) + r);
+    bb_ = math::AABB(box1, box2);
   }
 
   [[nodiscard]] bool Hit(const math::Ray& r, const math::Interval& t_interval,
@@ -23,7 +37,7 @@ class Sphere : public Hittable {
   [[nodiscard]] math::AABB GetBounds() const override { return bb_; }
 
  private:
-  math::Vec3 center_{};
+  math::Ray center_{};
   double radius_ = 0.0;
   std::shared_ptr<material::Material> material_{};
   math::AABB bb_{};

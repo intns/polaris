@@ -21,7 +21,7 @@ class Metal : public Material {
                math::Ray& scattered) const noexcept override {
     auto reflected = in.direction().Unit().Reflect(info.normal_);
     reflected = reflected + (fuzz_ * math::Vec3::RandomUnitVector());
-    scattered = math::Ray(info.point_, reflected);
+    scattered = math::Ray(info.point_, reflected, in.Time());
     attenuation = albedo_;
     return (scattered.direction().Dot(info.normal_) > 0);
   }

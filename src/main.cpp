@@ -66,7 +66,8 @@ int main(int argc, char** argv) {
             // diffuse
             auto albedo = image::PixelF64(math::RandomDouble(), math::RandomDouble(), math::RandomDouble()) * image::PixelF64(math::RandomDouble(), math::RandomDouble(), math::RandomDouble());
             sphere_material = std::make_shared<Lambertian>(albedo);
-            world.Add(std::make_shared<Sphere>(center, 0.2, sphere_material));
+            auto center2 = center + math::Vec3(0, math::RandomDouble(0, 0.5), 0);
+            world.Add(std::make_shared<Sphere>(center, center2, 0.2, sphere_material));
           } else if (choose_mat < 0.95) {
             // metal
             auto albedo = image::PixelF64(math::RandomDouble(), math::RandomDouble(), math::RandomDouble());

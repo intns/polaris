@@ -23,7 +23,7 @@ class Lambertian : public Material {
       scatter_direction = info.normal_;
     }
 
-    scattered = math::Ray(info.point_, scatter_direction);
+    scattered = math::Ray(info.point_, scatter_direction, in.Time());
     attenuation = albedo_;
     return true;
   }

@@ -4,7 +4,8 @@ namespace polaris::scene::objects {
 
 bool Sphere::Hit(const math::Ray& r, const math::Interval& t_interval,
                  HitInfo& rec) const {
-  math::Vec3 oc = center_ - r.origin();
+  math::Vec3 current_center = center_.at(r.Time());
+  math::Vec3 oc = current_center - r.origin();
   auto a = r.direction().LengthSquared();
   auto h = r.direction().Dot(oc);
   auto c = oc.LengthSquared() - radius_ * radius_;
@@ -28,8 +29,9 @@ bool Sphere::Hit(const math::Ray& r, const math::Interval& t_interval,
 
   rec.t_ = t;
   rec.point_ = r.at(t);
-  const auto inv_radius = 1.0f / radius_;
-  rec.SetNormal(r, (rec.point_ - center_) * inv_radius);
+  const math::Vec3 outward_normal = (rec.point_ - current_center) / radius_;
+  rec.SetNormal(r, outward_normal);
+  // GetSphereUV()???
   rec.material_ = material_;
 
   return true;

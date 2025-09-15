@@ -150,7 +150,9 @@ math::Ray Camera::GetRayFor(double u_norm, double v_norm) const {
 
   const auto ray_origin = (settings_.defocus_angle <= 0) ? center_ : DefocusDiskSample();
   const auto ray_direction = pixel_sample - center_;
-  return {ray_origin, ray_direction};
+  const auto ray_time = math::RandomDouble();
+
+  return {ray_origin, ray_direction, ray_time};
 }
 
 math::Vec3 Camera::DefocusDiskSample() const {

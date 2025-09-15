@@ -30,7 +30,7 @@ public:
     } else {
       direction = unit_direction.Refract(info.normal_, ri);
     }
-    scattered = math::Ray(info.point_, direction);
+    scattered = math::Ray(info.point_, direction, in.Time());
     return true;
   }
 
