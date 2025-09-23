@@ -1,7 +1,6 @@
 #include <scene/objects/Sphere.hpp>
 
 namespace polaris::scene::objects {
-
 bool Sphere::Hit(const math::Ray& r, const math::Interval& t_interval,
                  HitInfo& rec) const {
   math::Vec3 current_center = center_.at(r.Time());
@@ -31,9 +30,17 @@ bool Sphere::Hit(const math::Ray& r, const math::Interval& t_interval,
   rec.point_ = r.at(t);
   const math::Vec3 outward_normal = (rec.point_ - current_center) / radius_;
   rec.SetNormal(r, outward_normal);
-  // GetSphereUV()???
+  GetSphereUV(outward_normal, rec.u_, rec.v_);
   rec.material_ = material_;
 
   return true;
+}
+
+void Sphere::GetSphereUV(const math::Vec3& point, double& u, double& v) {
+  auto theta = std::acos(-point.Y());
+  auto phi = std::atan2(-point.Z(), point.X()) + std::numbers::pi;
+
+  u = phi / (2 * std::numbers::pi);
+  v = theta / std::numbers::pi;
 }
 }  // namespace polaris::scene::objects

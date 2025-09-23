@@ -33,24 +33,6 @@ int main(int argc, char** argv) {
     using scene::material::Material;
     using scene::material::Metal;
 
-    // original image
-
-    // auto material_ground =
-    //     std::make_shared<Lambertian>(image::PixelF64(0.8, 0.8, 0.0));
-    // auto material_right =
-    //     std::make_shared<Lambertian>(image::PixelF64(0.1, 0.2, 0.5));
-    // auto material_left = std::make_shared<Dielectric>(2.50);
-    // auto material_bubble = std::make_shared<Dielectric>(1.00 / 2.0);
-    // auto material_center =
-    //     std::make_shared<Metal>(image::PixelF64(0.9, 0.9, 0.9), 0.001);
-    //
-    // world.Add(
-    //     CreateSphere(math::Vec3(0.0, -100.5, -1.0), 100.0, material_ground));
-    // world.Add(CreateSphere(math::Vec3(0.0, 0.0, -1.2), 0.5, material_center));
-    // world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.5, material_left));
-    // world.Add(CreateSphere(math::Vec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
-    // world.Add(CreateSphere(math::Vec3(1.0, 0.0, -1.0), 0.5, material_right));
-
     // Book cover image test
 
     auto checker = std::make_shared<scene::texture::CheckerTexture>(0.32, image::PixelF64(0.2, 0.3, 0.1), image::PixelF64(0.9, 0.9, 0.9));

@@ -36,6 +36,8 @@ class Sphere : public Hittable {
 
   [[nodiscard]] math::AABB GetBounds() const override { return bb_; }
 
+  static void GetSphereUV(const math::Vec3& point, double& u, double& v);
+
  private:
   math::Ray center_{};
   double radius_ = 0.0;
