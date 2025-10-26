@@ -8,6 +8,10 @@
 #include <scene/material/Metal.hpp>
 #include <scene/objects/Sphere.hpp>
 #include <string>
+#include <cstdlib>
+#ifdef USE_VULKAN
+#include <vk/VulkanApp.hpp>
+#endif
 
 #include "scene/texture/CheckerTexture.hpp"
 
@@ -24,6 +28,36 @@ std::shared_ptr<scene::objects::Sphere> CreateSphere(
 int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
+
+  scene::CameraSettings settings;
+  settings.aspect_ratio = 16.0 / 9.0;
+  settings.image_width = 1280;
+  settings.samples_per_pixel = 100;
+  settings.max_depth_ = 10;
+  settings.fov = 20.0;
+  settings.defocus_angle = 0.6;
+  settings.focus_dist = 1.0;
+
+#ifdef USE_VULKAN
+  vk::VulkanApp vkapp{};
+  auto window = vkapp.initWindow(settings.image_width, static_cast<int>(settings.image_width / settings.aspect_ratio), "polaris");
+  if (!window.has_value()) {
+    return EXIT_FAILURE;
+  }
+  auto err = vkapp.init();
+  if (!err.has_value()) {
+    std::cerr << err.error() << '\n';
+  }
+
+  while (glfwWindowShouldClose(window.value()) == 0) {
+    glfwPollEvents();
+    vkapp.render();
+  }
+
+  vkDeviceWaitIdle(vkapp.getDevice());
+  vkapp.cleanup();
+  return EXIT_SUCCESS;
+#endif
 
   scene::HittableList world;
   {
@@ -77,15 +111,6 @@ int main(int argc, char** argv) {
     world.Add(make_shared<Sphere>(math::Vec3(4, 1, 0), 1.0, material3));
   }
   world = scene::HittableList(std::make_shared<math::BVHNode>(world));
-
-  scene::CameraSettings settings;
-  settings.aspect_ratio = 16.0 / 9.0;
-  settings.image_width = 1280;
-  settings.samples_per_pixel = 100;
-  settings.max_depth_ = 10;
-  settings.fov = 20.0;
-  settings.defocus_angle = 0.6;
-  settings.focus_dist = 1.0;
 
 #ifdef _WIN32
   settings.output_format_ = image::FileFormat::BMP;
