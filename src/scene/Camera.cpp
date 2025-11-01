@@ -17,7 +17,7 @@ Camera::Camera(const CameraSettings& settings) : settings_(settings) {
 
   pixel_samples_scale_ = 1.0 / settings_.samples_per_pixel;
 
-  SetTarget({0, 0, 0}, math::Vec3{0, 0, -1});
+  SetTarget(polaris::math::Vec3(0, 0, 0), math::Vec3{0, 0, -1});
 }
 
 void Camera::SetTarget(const math::Vec3& pos,
@@ -34,8 +34,8 @@ void Camera::SetTarget(const math::Vec3& pos,
       viewport_height *
       (static_cast<double>(settings_.image_width) / image_height_);
 
-  w = (position_ - lookat_).Unit();
-  u = up_.Cross(w).Unit();
+  w = (position_ - lookat_).Normalized();
+  u = up_.Cross(w).Normalized();
   v = w.Cross(u);
 
   auto viewport_u = viewport_width * u;
@@ -178,7 +178,7 @@ image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
     return {0, 0, 0};
   }
 
-  math::Vec3 unit_direction = r.direction().Unit();
+  math::Vec3 unit_direction = r.direction().Normalized();
   auto a = 0.5 * (unit_direction.Y() + 1.0);
   // Blue-ish sky gradient from white at the horizon to light blue at the top
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +

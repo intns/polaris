@@ -1,7 +1,6 @@
 #ifndef POLARIS_MATH_COMMON_HPP
 #define POLARIS_MATH_COMMON_HPP
 
-#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -9,6 +8,8 @@
 #include <random>
 
 namespace polaris::math {
+template<typename T>
+concept NumericType = std::is_arithmetic_v<T>;
 
 constexpr auto kInfinity = std::numeric_limits<double>::infinity();
 
@@ -20,21 +21,29 @@ inline double RadiansToDegrees(double radians) {
   return radians * 180.0 / std::numbers::pi;
 }
 
-inline double RandomDouble() {
+template<NumericType T>
+inline T RandomValue(T min = 0.0, T max = 1.0) {
   static thread_local std::mt19937 generator(std::random_device{}());
-  static thread_local std::uniform_real_distribution<double> distribution(0.0,
-                                                                          1.0);
-  return distribution(generator);
+
+  if constexpr (std::floating_point<T>) {
+    std::uniform_real_distribution<T> distribution(min, max);
+    return distribution(generator);
+  } else if constexpr (std::integral<T>) {
+    std::uniform_int_distribution<T> distribution(min, max);
+    return distribution(generator);
+  }
+}
+
+inline double RandomDouble() {
+  return RandomValue<double>();
 }
 
 inline double RandomDouble(double min, double max) {
-  static thread_local std::mt19937 generator(std::random_device{}());
-  std::uniform_real_distribution<double> distribution(min, max);
-  return distribution(generator);
+  return RandomValue<double>(min, max);
 }
 
 inline int RandomInt(int min, int max) {
-  return static_cast<int>(RandomDouble(min, max + 1));
+  return RandomValue<int>(min, max);
 }
 }  // namespace polaris::math
 

@@ -5,138 +5,200 @@
 #include <cmath>
 #include <iostream>
 #include <math/Common.hpp>
+#include <type_traits>
+
 
 namespace polaris::math {
 
-class Vec3 {
+template<NumericType T, std::size_t N>
+requires (N >=2 && N <= 4)
+class Vector {
+  std::array<T, N> data{};
+
  public:
-  std::array<double, 3> e;
+  constexpr explicit Vector() noexcept = default;
 
-  constexpr Vec3() noexcept : e{0, 0, 0} {}
-  constexpr Vec3(double e0, double e1, double e2) noexcept : e{e0, e1, e2} {}
+  // can further constrain by std::convertible_to and have this accept types other than NumericType
+  // but let's let the callers do the casts instead :D
+  template<NumericType... Args>
+  requires (sizeof...(Args) == N)
+  constexpr explicit Vector(Args... args) noexcept : data{T(args)...} {}
 
-  [[nodiscard]] constexpr double X() const noexcept { return e[0]; }
-  [[nodiscard]] constexpr double Y() const noexcept { return e[1]; }
-  [[nodiscard]] constexpr double Z() const noexcept { return e[2]; }
+  constexpr T& operator[](std::size_t i) noexcept { return data[i]; }
+  constexpr const T& operator[](std::size_t i) const noexcept { return data[i]; }
 
-  [[nodiscard]] constexpr Vec3 operator-() const noexcept {
-    return {-e[0], -e[1], -e[2]};
+  constexpr T X() const noexcept { return data[0]; }
+  constexpr T Y() const noexcept { return data[1]; }
+  constexpr T Z() const noexcept requires (N >= 3) { return data[2]; }
+  constexpr T W() const noexcept requires (N >= 4) { return data[3]; }
+  constexpr auto XY() const noexcept { return Vector<T, 2>{data[0], data[1]}; }
+  constexpr auto XZ() const noexcept requires (N >= 3) { return Vector<T, 2>{data[0], data[2]}; }
+  constexpr auto YZ() const noexcept requires (N >= 3) { return Vector<T, 2>{data[1], data[2]}; }
+  constexpr auto XYZ() const noexcept requires (N >= 3) { return Vector<T, 3>{data[0], data[1], data[2]}; }
+  constexpr auto XYW() const noexcept requires (N >= 4) { return Vector<T, 3>{data[0], data[1], data[3]}; }
+  constexpr auto XZW() const noexcept requires (N >= 4) { return Vector<T, 3>{data[0], data[2], data[3]}; }
+  constexpr auto XYZW() const noexcept requires (N >= 4) { return Vector<T, 4>{data[0], data[1], data[2], data[3]}; }
+
+  friend constexpr Vector operator+(const Vector& a, const Vector& b) noexcept {
+    Vector result;
+    for (std::size_t i = 0; i < N; ++i) { result.data[i] = a.data[i] + b.data[i]; }
+    return result;
   }
-  [[nodiscard]] constexpr double operator[](int i) const noexcept {
-    return e[i];
-  }
-  constexpr double& operator[](int i) noexcept { return e[i]; }
 
-  Vec3& operator+=(const Vec3& v) {
-    e[0] += v.e[0];
-    e[1] += v.e[1];
-    e[2] += v.e[2];
+  friend constexpr Vector operator-(const Vector& a, const Vector& b) noexcept {
+    Vector result;
+    for (std::size_t i = 0; i < N; ++i) { result.data[i] = a.data[i] - b.data[i]; }
+    return result;
+  }
+
+  friend constexpr Vector operator-(const Vector& v) noexcept {
+    Vector result;
+    for (std::size_t i = 0; i < N; ++i) { result.data[i] = -v.data[i]; }
+    return result;
+  }
+
+  friend constexpr Vector operator*(const Vector& v, T scalar) noexcept {
+    Vector result;
+    for (std::size_t i = 0; i < N; ++i) { result.data[i] = v.data[i] * scalar; }
+    return result;
+  }
+
+  friend constexpr Vector operator*(T scalar, const Vector& v) noexcept {
+    return v * scalar;
+  }
+
+  friend constexpr Vector operator/(const Vector& v, T scalar) noexcept {
+    Vector result;
+    for (std::size_t i = 0; i < N; ++i) { result.data[i] = v.data[i] / scalar; }
+    return result;
+  }
+
+  friend constexpr bool operator==(const Vector& a, const Vector& b) noexcept {
+    for (std::size_t i = 0; i < N; ++i) {
+      if (a.data[i] != b.data[i]) { return false; }
+    }
+    return true;
+  }
+
+  friend constexpr bool operator!=(const Vector& a, const Vector& b) noexcept {
+    return !(a == b);
+  }
+
+  constexpr Vector& operator+=(const Vector& rhs) noexcept {
+    for (std::size_t i = 0; i < N; ++i) { data[i] += rhs.data[i]; }
     return *this;
   }
 
-  Vec3& operator-=(const Vec3& v) {
-    e[0] -= v.e[0];
-    e[1] -= v.e[1];
-    e[2] -= v.e[2];
+  constexpr Vector& operator-=(const Vector& rhs) noexcept {
+    for (std::size_t i = 0; i < N; ++i) { data[i] -= rhs.data[i]; }
     return *this;
   }
 
-  Vec3& operator*=(double t) {
-    e[0] *= t;
-    e[1] *= t;
-    e[2] *= t;
+  constexpr Vector& operator*=(T scalar) noexcept {
+    for (std::size_t i = 0; i < N; ++i) { data[i] *= scalar; }
     return *this;
   }
 
-  Vec3& operator*=(const Vec3& v) {
-    e[0] *= v.e[0];
-    e[1] *= v.e[1];
-    e[2] *= v.e[2];
+  constexpr Vector& operator/=(T scalar) noexcept {
+    for (std::size_t i = 0; i < N; ++i) { data[i] /= scalar; }
     return *this;
   }
 
-  Vec3& operator/=(double t) { return *this *= 1 / t; }
-
-  [[nodiscard]] double Length() const { return std::sqrt(LengthSquared()); }
-  [[nodiscard]] constexpr double LengthSquared() const noexcept {
-    return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+  constexpr T Dot(const Vector& rhs) const noexcept {
+    T sum = 0;
+    for (std::size_t i = 0; i < N; ++i) { sum += data[i] * rhs.data[i]; }
+    return sum;
   }
 
-  [[nodiscard]] static Vec3 Random() {
-    return {RandomDouble(), RandomDouble(), RandomDouble()};
+  constexpr auto Cross(const Vector& rhs) const noexcept requires (N == 3) {
+    return Vector {
+      (data[1] * rhs.data[2]) - (data[2] * rhs.data[1]),
+      (data[2] * rhs.data[0]) - (data[0] * rhs.data[2]),
+      (data[0] * rhs.data[1]) - (data[1] * rhs.data[0])
+    };
   }
 
-  [[nodiscard]] static Vec3 Random(double min, double max) {
-    return {RandomDouble(min, max), RandomDouble(min, max),
-            RandomDouble(min, max)};
+  constexpr T Length() const noexcept {
+    return std::sqrt(Dot(*this));
   }
 
-  [[nodiscard]] constexpr double Dot(const Vec3& v) const noexcept {
-    return e[0] * v.e[0] + e[1] * v.e[1] + e[2] * v.e[2];
+  constexpr Vector Normalized() const noexcept {
+    T len = Length();
+    if (len == T(0)) { return *this; }
+    return *this / len;
   }
 
-  [[nodiscard]] constexpr Vec3 Cross(const Vec3& v) const noexcept {
-    return {e[1] * v.e[2] - e[2] * v.e[1], e[2] * v.e[0] - e[0] * v.e[2],
-            e[0] * v.e[1] - e[1] * v.e[0]};
+  friend std::ostream& operator<<(std::ostream& out, const Vector& v) {
+    for (std::size_t i = 0; i < N; ++i) {
+      out << v.data[i];
+      if (i + 1 < N) { out << ' '; }
+    }
+    return out;
   }
 
-  [[nodiscard]] Vec3 Unit() const { return *this / Length(); }
+  constexpr T LengthSquared() const noexcept {
+    return Dot(*this);
+  }
 
-  [[nodiscard]] static Vec3 RandomInUnitDisk() {
+  static Vector Random(T min = T(0.0), T max = T(1.0)) {
+    return MakeRandom(std::make_index_sequence<N>{}, min, max);
+  }
+
+  static Vector RandomInUnitDisk() requires (std::is_floating_point_v<T> && N == 3) {
     while (true) {
-      auto p = Vec3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0);
-      if (p.LengthSquared() < 1)
-        return p;
+      auto p = Vector(RandomValue<T>(-1, 1), RandomValue<T>(-1, 1), 0);
+      if (p.LengthSquared() < 1) { return p; }
     }
   }
 
   // Thanks GPT
-  [[nodiscard]] static Vec3 RandomUnitVector() {
-    auto Z = RandomDouble(-1, 1);
-    auto a = RandomDouble(0, 2 * std::numbers::pi);
-    auto r = std::sqrt(1 - Z * Z);
-    return {r * std::cos(a), r * std::sin(a), Z};
+  static Vector RandomUnitVector() requires (std::is_floating_point_v<T> && N == 3)  {
+    auto Z = RandomValue<T>(-1, 1);
+    auto a = RandomValue<T>(0, 2 * std::numbers::pi);
+    auto r = std::sqrt(1 - (Z * Z));
+    return Vector(r * std::cos(a), r * std::sin(a), Z);
   }
 
-  [[nodiscard]] static Vec3 RandomOnHemisphere(const Vec3& normal) {
+  static Vector RandomOnHemisphere(const Vector& normal) requires (std::is_floating_point_v<T> && N == 3) {
     const auto on_unit_sphere = RandomUnitVector();
     if (on_unit_sphere.Dot(normal) > 0.0) {
       return on_unit_sphere;
     }
 
-      return -on_unit_sphere;
-    }
-
-  [[nodiscard]] Vec3 Reflect(const Vec3& n) const {
-    return *this - 2 * Dot(n) * n;
+    return -on_unit_sphere;
   }
 
-  [[nodiscard]] Vec3 Refract(const Vec3& n, double etai_over_etat) const {
+  Vector Reflect(const Vector& n) const requires (std::is_floating_point_v<T> && N == 3) {
+    return *this - (2 * Dot(n) * n);
+  }
+
+  Vector Refract(const Vector& n, T etai_over_etat) const requires (std::is_floating_point_v<T> && N == 3) {
     const auto& uv = *this;
     auto cos_theta = std::fmin((-uv).Dot(n), 1.0);
-    Vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-    Vec3 r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.LengthSquared())) * n;
+    Vector r_out_perp = etai_over_etat * (uv + cos_theta * n);
+    Vector r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.LengthSquared())) * n;
     return r_out_perp + r_out_parallel;
   }
 
-  [[nodiscard]] bool NearZero() const {
+  bool NearZero() const requires (std::is_floating_point_v<T>) {
     constexpr auto s = 1e-8;
     return LengthSquared() < (s * s);
   }
 
-  friend std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-    return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
+ private:
+  template <std::size_t... I>
+  static constexpr Vector MakeRandom(std::index_sequence<I...>, T min, T max) noexcept { // NOLINT
+      return Vector{ (static_cast<void>(I), RandomValue<T>(min, max))... };
   }
-
-  // clang-format off
-  friend  Vec3 operator+(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]}; }
-  friend  Vec3 operator-(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]}; }
-  friend  Vec3 operator*(const Vec3& u, const Vec3& v) noexcept { return {u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]}; }
-  friend  Vec3 operator*(double t, const Vec3& v) noexcept { return {t * v.e[0], t * v.e[1], t * v.e[2]}; }
-  friend  Vec3 operator*(const Vec3& v, double t) noexcept { return t * v; }
-  friend  Vec3 operator/(const Vec3& v, double t) noexcept { return (1 / t) * v; }
-  // clang-format on
 };
-}  // namespace polaris::math
+
+// old class compatibility
+using Vec3 = Vector<double, 3>;
+// GLSL aliases
+using vec2 = Vector<float, 2>;
+using vec3 = Vector<float, 3>;
+using vec4 = Vector<float, 4>;
+
+} // namespace polaris::math
 
 #endif

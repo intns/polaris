@@ -1,6 +1,7 @@
 #ifndef POLARIS_SCENE_CHECKER_TEXTURE_HPP
 #define POLARIS_SCENE_CHECKER_TEXTURE_HPP
 
+#include <memory>
 #include <scene/texture/Texture.hpp>
 
 #include "SolidColour.hpp"

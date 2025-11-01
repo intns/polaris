@@ -17,7 +17,7 @@ public:
     attenuation = image::PixelF64(1.0, 1.0, 1.0);
     double ri = info.front_face_ ? (1.0 / refraction_index_) : refraction_index_;
 
-    math::Vec3 unit_direction = in.direction().Unit();
+    math::Vec3 unit_direction = in.direction().Normalized();
     const double cos_theta =
         std::fmin((-unit_direction).Dot(info.normal_), 1.0);
     const double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);

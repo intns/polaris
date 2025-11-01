@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 #endif
 
   scene::Camera cam(settings);
-  cam.SetTarget({13, 2, 3}, math::Vec3{0, 0, 0});
+  cam.SetTarget(polaris::math::Vec3(13, 2, 3), math::Vec3{0, 0, 0});
   cam.Render(world);
   cam.Write("out");
   return 0;
