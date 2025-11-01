@@ -30,7 +30,7 @@ class AABB {
   [[nodiscard]] const Interval& Y() const noexcept { return y_; }
   [[nodiscard]] const Interval& Z() const noexcept { return z_; }
 
-  [[nodiscard]] const Interval& Axis(int axis) const noexcept {
+  [[nodiscard]] const Interval& Axis(int axis) const {
     switch (axis) {
       case 0:
         return x_;
@@ -43,7 +43,7 @@ class AABB {
     }
   }
 
-  [[nodiscard]] bool Hit(const Ray& r, Interval t_interval) const noexcept {
+  [[nodiscard]] bool Hit(const Ray& r, Interval t_interval) const {
     const auto& origin = r.origin();
     const auto& inv_direction = r.InverseDirection();
 
@@ -51,7 +51,7 @@ class AABB {
     auto tmax = t_interval.Max();
 
     for (int a = 0; a < 3; ++a) {
-      auto& ax = Axis(a);
+      const auto& ax = Axis(a);
       auto t0 = (ax.Min() - origin[a]) * inv_direction[a];
       auto t1 = (ax.Max() - origin[a]) * inv_direction[a];
 
@@ -73,7 +73,7 @@ class AABB {
   }
 
  private:
-  Interval x_{}, y_{}, z_{};
+  Interval x_, y_, z_;
 };
 
 }  // namespace polaris::math

@@ -20,7 +20,7 @@ public:
     math::Vec3 unit_direction = in.direction().Normalized();
     const double cos_theta =
         std::fmin((-unit_direction).Dot(info.normal_), 1.0);
-    const double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+    const double sin_theta = std::sqrt(1.0 - (cos_theta * cos_theta));
 
     const bool cannot_refract = ri * sin_theta > 1.0;
     math::Vec3 direction;

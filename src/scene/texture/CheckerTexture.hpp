@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <scene/texture/Texture.hpp>
+#include <utility>
 
 #include "SolidColour.hpp"
 
@@ -11,7 +12,7 @@ class CheckerTexture : public Texture {
 public:
   CheckerTexture(const double scale, std::shared_ptr<Texture> even,
                  std::shared_ptr<Texture> odd)
-                   : inv_scale_(1.0 / scale), even_(even), odd_(odd) {}
+                   : inv_scale_(1.0 / scale), even_(std::move(even)), odd_(std::move(odd)) {}
 
   CheckerTexture(const double scale, const image::PixelF64& c1,
                  const image::PixelF64& c2)

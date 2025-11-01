@@ -7,9 +7,9 @@ bool Sphere::Hit(const math::Ray& r, const math::Interval& t_interval,
   math::Vec3 oc = current_center - r.origin();
   auto a = r.direction().LengthSquared();
   auto h = r.direction().Dot(oc);
-  auto c = oc.LengthSquared() - radius_ * radius_;
+  auto c = oc.LengthSquared() - (radius_ * radius_);
 
-  auto discriminant = h * h - a * c;
+  auto discriminant = (h * h) - (a * c);
   if (discriminant < 0) {
     return false;
   }

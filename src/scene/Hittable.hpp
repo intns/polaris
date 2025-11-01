@@ -44,11 +44,11 @@ class Hittable {
 class HittableList : public Hittable {
  public:
   HittableList() = default;
-  explicit HittableList(std::shared_ptr<Hittable> object) { Add(object); };
+  explicit HittableList(const std::shared_ptr<Hittable>& object) { Add(object); };
 
   void Clear() { objects.clear(); }
 
-  void Add(std::shared_ptr<Hittable> object) {
+  void Add(const std::shared_ptr<Hittable>& object) {
     objects.push_back(object);
     bb_ = math::AABB(bb_, object->GetBounds());
   }

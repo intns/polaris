@@ -1,10 +1,6 @@
 #ifndef POLARIS_MATH_INTERVAL_HPP
 #define POLARIS_MATH_INTERVAL_HPP
 
-#include <algorithm>
-#include <compare>
-#include <concepts>
-#include <cstdint>
 #include <limits>
 
 namespace polaris::math {
@@ -26,9 +22,9 @@ class Interval {
 
   [[nodiscard]] constexpr double Size() const noexcept { return max_ - min_; }
 
-  constexpr Interval Expand(double delta) noexcept {
+  constexpr Interval Expand(double delta) const noexcept {
     auto padding = delta / 2;
-    return Interval(min_ - padding, max_ + padding);
+    return {min_ - padding, max_ + padding};
   }
 
   [[nodiscard]] constexpr bool Surrounds(double X) const noexcept {

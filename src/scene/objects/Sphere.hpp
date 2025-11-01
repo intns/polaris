@@ -6,6 +6,7 @@
 #include <math/Vec.hpp>
 #include <scene/Hittable.hpp>
 #include <scene/material/Material.hpp>
+#include <utility>
 
 namespace polaris::scene::objects {
 class Sphere : public Hittable {
@@ -15,7 +16,7 @@ class Sphere : public Hittable {
           std::shared_ptr<material::Material> mat)
             : center_(static_centre, math::Vec3(0, 0, 0)),
               radius_(std::fmax(0, radius)),
-              material_(mat) {
+              material_(std::move(mat)) {
     auto r = math::Vec3(radius, radius, radius);
     bb_ = math::AABB(static_centre - r, static_centre + r);
   }
@@ -24,7 +25,7 @@ class Sphere : public Hittable {
           const double radius, std::shared_ptr<material::Material> mat)
             : center_(center1, center2 - center1),
               radius_(std::fmax(0, radius)),
-              material_(mat) {
+              material_(std::move(mat)) {
     auto r = math::Vec3(radius, radius, radius);
     const math::AABB box1(center_.at(0) - r, center_.at(0) + r);
     const math::AABB box2(center_.at(1) - r, center_.at(1) + r);
@@ -39,10 +40,10 @@ class Sphere : public Hittable {
   static void GetSphereUV(const math::Vec3& point, double& u, double& v);
 
  private:
-  math::Ray center_{};
+  math::Ray center_;
   double radius_ = 0.0;
-  std::shared_ptr<material::Material> material_{};
-  math::AABB bb_{};
+  std::shared_ptr<material::Material> material_;
+  math::AABB bb_;
 };
 }  // namespace polaris::scene::objects
 

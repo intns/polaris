@@ -27,7 +27,7 @@ class Metal : public Material {
   }
 
  private:
-  image::PixelF64 albedo_{};
+  image::PixelF64 albedo_;
   double fuzz_ = 0.0;
 };
 

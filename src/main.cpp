@@ -13,13 +13,14 @@
 
 using namespace polaris;
 
-namespace {
-std::shared_ptr<scene::objects::Sphere> CreateSphere(
-    const math::Vec3& pos, double radius,
-    const std::shared_ptr<scene::material::Material>& mat) {
-  return std::make_shared<scene::objects::Sphere>(pos, radius, mat);
-}
-}  // namespace
+// unused function
+// namespace {
+// std::shared_ptr<scene::objects::Sphere> CreateSphere(
+//     const math::Vec3& pos, double radius,
+//     const std::shared_ptr<scene::material::Material>& mat) {
+//   return std::make_shared<scene::objects::Sphere>(pos, radius, mat);
+// }
+// }  // namespace
 
 int main(int argc, char** argv) {
   (void)argc;
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
     for (int a = -11; a < 11; a++) {
       for (int b = -11; b < 11; b++) {
         auto choose_mat = math::RandomDouble();
-        const math::Vec3 center(a + 0.9 * math::RandomDouble(), 0.2, b + 0.9 * math::RandomDouble());
+        const math::Vec3 center(a + (0.9 * math::RandomDouble()), 0.2, b + (0.9 * math::RandomDouble()));
 
         if ((center - math::Vec3(4, 0.2, 0)).Length() > 0.9) {
           std::shared_ptr<Material> sphere_material;
@@ -94,7 +95,7 @@ int main(int argc, char** argv) {
 #endif
 
   scene::Camera cam(settings);
-  cam.SetTarget(polaris::math::Vec3(13, 2, 3), math::Vec3{0, 0, 0});
+  cam.SetTarget(math::Vec3(13, 2, 3), math::Vec3{0, 0, 0});
   cam.Render(world);
   cam.Write("out");
   return 0;

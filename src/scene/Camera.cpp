@@ -9,13 +9,11 @@
 
 namespace polaris::scene {
 
-Camera::Camera(const CameraSettings& settings) : settings_(settings) {
+Camera::Camera(const CameraSettings& settings) : settings_(settings), pixel_samples_scale_(1.0 / settings_.samples_per_pixel) {
   const auto image_width = settings_.image_width;
   image_height_ = static_cast<int>(image_width / settings_.aspect_ratio);
   image_height_ = std::max(image_height_, 1);
   frame_buffer_.Assign(settings_.output_format_, image_width, image_height_);
-
-  pixel_samples_scale_ = 1.0 / settings_.samples_per_pixel;
 
   SetTarget(polaris::math::Vec3(0, 0, 0), math::Vec3{0, 0, -1});
 }
@@ -75,9 +73,10 @@ void Camera::Render(const Hittable& world) {
   std::atomic<size_t> next_tile{0};
 
   std::vector<std::jthread> threads;
+  threads.reserve(std::jthread::hardware_concurrency());
   for (size_t t = 0; t < std::jthread::hardware_concurrency(); ++t) {
     threads.emplace_back([&, seed = std::random_device{}() + t] {
-      thread_local std::mt19937 rng(seed);
+      static thread_local std::mt19937 rng(seed);
 
       size_t idx;
       while ((idx = next_tile.fetch_add(1)) < tiles.size()) {
@@ -91,7 +90,7 @@ void Camera::Render(const Hittable& world) {
 void Camera::RenderTile(int x0, int y0, int x1, int y1, const Hittable& world,
                         std::mt19937& rng) {
   std::uniform_real_distribution<> dist(0.0, 1.0);
-  const int sqrt_spp = std::sqrt(settings_.samples_per_pixel);
+  const int sqrt_spp = static_cast<int>(std::sqrt(settings_.samples_per_pixel));
   const double inv_sqrt_spp = 1.0 / sqrt_spp;
   const double inv_width = 1.0 / (settings_.image_width - 1);
   const double inv_height = 1.0 / (image_height_ - 1);
@@ -103,9 +102,9 @@ void Camera::RenderTile(int x0, int y0, int x1, int y1, const Hittable& world,
       // Stratified sampling
       for (int sy = 0; sy < sqrt_spp; ++sy) {
         for (int sx = 0; sx < sqrt_spp; ++sx) {
-          auto u = (x + (sx + dist(rng)) * inv_sqrt_spp) * inv_width;
-          auto v = (y + (sy + dist(rng)) * inv_sqrt_spp) * inv_height;
-          color += RayColour(GetRayFor(u, v), settings_.max_depth_, world);
+          auto u_l = (x + (sx + dist(rng)) * inv_sqrt_spp) * inv_width;
+          auto v_l = (y + (sy + dist(rng)) * inv_sqrt_spp) * inv_height;
+          color += RayColour(GetRayFor(u_l, v_l), settings_.max_depth_, world);
         }
       }
 

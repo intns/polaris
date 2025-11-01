@@ -81,7 +81,8 @@ class BVHNode : public scene::Hittable {
         }
       }
 
-      auto mid = start + span / 2;
+      auto mid = start + (span / 2);
+      // NOLINTBEGIN(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
       std::nth_element(objects.begin() + start, objects.begin() + mid,
                        objects.begin() + end,
                        [axis](const auto& a, const auto& b) {
@@ -95,31 +96,32 @@ class BVHNode : public scene::Hittable {
       right_ = std::make_shared<BVHNode>(
           std::vector<std::shared_ptr<scene::Hittable>>(objects.begin() + mid,
                                                         objects.begin() + end));
+      // NOLINTEND(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
     }
 
     box_ = math::AABB(left_->GetBounds(),
                       right_ ? right_->GetBounds() : left_->GetBounds());
   }
 
-  [[nodiscard]] static bool BoxCompare(const std::shared_ptr<Hittable> a,
-    const std::shared_ptr<Hittable> b, int axis_index) {
+  [[nodiscard]] static bool BoxCompare(const std::shared_ptr<Hittable>& a,
+    const std::shared_ptr<Hittable>& b, int axis_index) {
     auto a_axis_interval = a->GetBounds().Axis(axis_index);
     auto b_axis_interval = b->GetBounds().Axis(axis_index);
     return a_axis_interval.Min() < b_axis_interval.Min();
   }
 
-  [[nodiscard]] static bool BoxXCompare(const std::shared_ptr<Hittable> a,
-    const std::shared_ptr<Hittable> b) {
+  [[nodiscard]] static bool BoxXCompare(const std::shared_ptr<Hittable>& a,
+    const std::shared_ptr<Hittable>& b) {
     return BoxCompare(a, b, 0);
   }
 
-  [[nodiscard]] static bool BoxYCompare(const std::shared_ptr<Hittable> a,
-    const std::shared_ptr<Hittable> b) {
+  [[nodiscard]] static bool BoxYCompare(const std::shared_ptr<Hittable>& a,
+    const std::shared_ptr<Hittable>& b) {
     return BoxCompare(a, b, 1);
   }
 
-  [[nodiscard]] static bool BoxZCompare(const std::shared_ptr<Hittable> a,
-    const std::shared_ptr<Hittable> b) {
+  [[nodiscard]] static bool BoxZCompare(const std::shared_ptr<Hittable>& a,
+    const std::shared_ptr<Hittable>& b) {
     return BoxCompare(a, b, 2);
   }
 

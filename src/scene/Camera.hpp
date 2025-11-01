@@ -34,7 +34,7 @@ class Camera {
   void Render(const Hittable& world);
   void Write(const std::string& filename);
 
-  void SetTarget(const math::Vec3& pos, std::optional<math::Vec3> lookat);
+  void SetTarget(const math::Vec3& pos, std::optional<math::Vec3> opt_lookat);
 
  private:
   math::Ray GetRayFor(double u_norm, double v_norm) const;
@@ -51,19 +51,19 @@ class Camera {
 
   double pixel_samples_scale_ = 0.0;   // Color scale factor for sampled pixels
   int image_height_ = 0;               // Rendered image height
-  math::Vec3 center_{};                // Camera center
-  math::Vec3 pixel00_loc_{};           // Location of pixel 0, 0
-  math::Vec3 pixel_delta_u_{};         // Offset to pixel to the right
-  math::Vec3 pixel_delta_v_{};         // Offset to pixel below
-  image::FrameBuffer frame_buffer_{};  // Destination image
+  math::Vec3 center_;                // Camera center
+  math::Vec3 pixel00_loc_;           // Location of pixel 0, 0
+  math::Vec3 pixel_delta_u_;         // Offset to pixel to the right
+  math::Vec3 pixel_delta_v_;         // Offset to pixel below
+  image::FrameBuffer frame_buffer_;  // Destination image
 
-  math::Vec3 position_{};
+  math::Vec3 position_;
   math::Vec3 lookat_{0, 0, -1};
   const math::Vec3 up_{0, 1, 0};
-  math::Vec3 u{}, v{}, w{};  // Basis vectors
+  math::Vec3 u, v, w;  // Basis vectors
 
-  math::Vec3 defocus_disk_u_{};
-  math::Vec3 defocus_disk_v_{};
+  math::Vec3 defocus_disk_u_;
+  math::Vec3 defocus_disk_v_;
 };
 
 }  // namespace polaris::scene

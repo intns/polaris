@@ -15,11 +15,11 @@
 namespace polaris::image {
 class RTWImage {
 public:
-  RTWImage() {} // seems wrong...
+  RTWImage() = default; // seems wrong...
 
-  RTWImage(const char* image_filename) {
+  explicit RTWImage(const char* image_filename) {
     auto filename = std::string(image_filename);
-    auto imagedir = getenv("RTW_IMAGES");
+    auto *imagedir = getenv("RTW_IMAGES");
 
     if (imagedir && load(std::string(imagedir) + "/" + image_filename)) return;
     if (load(filename)) return;
@@ -59,7 +59,7 @@ public:
     x = Clamp(x, 0, image_width_);
     y = Clamp(y, 0, image_height_);
 
-    return bdata_ + y * bytes_per_scanline_ + x * bytes_per_pixel_;
+    return bdata_ + (y * bytes_per_scanline_) + (x * bytes_per_pixel_);
   }
 
 private:

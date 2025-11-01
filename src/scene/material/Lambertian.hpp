@@ -8,6 +8,7 @@
 #include <scene/material/Material.hpp>
 #include <scene/texture/Texture.hpp>
 #include <scene/texture/SolidColour.hpp>
+#include <utility>
 
 namespace polaris::scene::material {
 
@@ -16,7 +17,7 @@ class Lambertian : public Material {
   explicit Lambertian(const image::PixelF64& albedo)
     : texture_(std::make_shared<texture::SolidColour>(albedo)) {}
   explicit Lambertian(std::shared_ptr<texture::Texture> texture)
-    : texture_(texture) {}
+    : texture_(std::move(texture)) {}
   ~Lambertian() override = default;
 
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,

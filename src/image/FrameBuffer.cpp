@@ -53,7 +53,7 @@ void FrameBuffer::WriteAsPPM(std::ofstream& out) {
 
   for (size_t y = 0; y < height_; ++y) {
     for (size_t x = 0; x < width_; ++x) {
-      out << data_[y * width_ + x] << ' ';
+      out << data_[(y * width_) + x] << ' ';
     }
   }
 
@@ -65,7 +65,7 @@ void FrameBuffer::WriteAsBMP(std::ofstream& out) {
   size_t pixel_offset = 54;
   size_t row_bytes = width_ * 3;
   size_t padding = (4 - (row_bytes % 4)) % 4;
-  size_t file_size = pixel_offset + (row_bytes + padding) * height_;
+  size_t file_size = pixel_offset + ((row_bytes + padding) * height_);
 
   // Write BMP file header
   out.seekp(0, std::ios::beg);
@@ -92,7 +92,7 @@ void FrameBuffer::WriteAsBMP(std::ofstream& out) {
   std::vector<std::uint8_t> pad(padding, 0);
   for (int y = static_cast<int>(height_ - 1); y >= 0; --y) {
     for (size_t x = 0; x < width_; ++x) {
-      const PixelU8& p = data_[y * width_ + x];
+      const PixelU8& p = data_[(y * width_) + x];
       std::array<std::uint8_t, 3> bgr{p.B(), p.G(), p.R()};
       out.write(reinterpret_cast<char*>(bgr.data()), bgr.size());
     }

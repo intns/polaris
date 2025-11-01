@@ -36,7 +36,7 @@ class FrameBuffer {
 
   FileFormat format_ = FileFormat::BMP;
   std::size_t width_ = 0, height_ = 0;
-  std::vector<PixelU8> data_{};  // RGB byte data
+  std::vector<PixelU8> data_;  // RGB byte data
 };
 }  // namespace polaris::image
 
