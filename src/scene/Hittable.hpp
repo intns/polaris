@@ -20,7 +20,7 @@ struct HitInfo {
   std::shared_ptr<material::Material> material_;
 
   void SetNormal(const math::Ray& r, const math::Vec3& outward_normal) {
-    if (r.direction().Dot(outward_normal) < 0) {
+    if (r.Direction().Dot(outward_normal) < 0) {
       front_face_ = true;
       normal_ = outward_normal;
     } else {

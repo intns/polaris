@@ -17,8 +17,8 @@ class Ray {
   Ray(const Vec3& origin, const Vec3& direction)
       : Ray(origin, direction, 0) {}
 
-  [[nodiscard]] const Vec3& origin() const { return origin_; }
-  [[nodiscard]] const Vec3& direction() const { return direction_; }
+  [[nodiscard]] const Vec3& Origin() const { return origin_; }
+  [[nodiscard]] const Vec3& Direction() const { return direction_; }
   [[nodiscard]] double Time() const { return tm_; }
   [[nodiscard]] const Vec3& InverseDirection() const { return inv_direction_; }
 

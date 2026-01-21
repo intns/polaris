@@ -4,9 +4,9 @@ namespace polaris::scene::objects {
 bool Sphere::Hit(const math::Ray& r, const math::Interval& t_interval,
                  HitInfo& rec) const {
   math::Vec3 current_center = center_.at(r.Time());
-  math::Vec3 oc = current_center - r.origin();
-  auto a = r.direction().LengthSquared();
-  auto h = r.direction().Dot(oc);
+  math::Vec3 oc = current_center - r.Origin();
+  auto a = r.Direction().LengthSquared();
+  auto h = r.Direction().Dot(oc);
   auto c = oc.LengthSquared() - (radius_ * radius_);
 
   auto discriminant = (h * h) - (a * c);

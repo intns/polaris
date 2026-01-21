@@ -11,12 +11,16 @@ class AABB {
   AABB() = default;
 
   AABB(const Interval& x, const Interval& y, const Interval& z) noexcept
-      : x_(x), y_(y), z_(z) {}
+      : x_(x), y_(y), z_(z) {
+        PadToMinimums();
+      }
 
   AABB(const Vec3& a, const Vec3& b) noexcept
       : x_(std::min(a.X(), b.X()), std::max(a.X(), b.X())),
         y_(std::min(a.Y(), b.Y()), std::max(a.Y(), b.Y())),
-        z_(std::min(a.Z(), b.Z()), std::max(a.Z(), b.Z())) {}
+        z_(std::min(a.Z(), b.Z()), std::max(a.Z(), b.Z())) {
+          PadToMinimums();
+        }
 
   AABB(const AABB& box0, const AABB& box1) noexcept
       : x_(std::min(box0.x_.Min(), box1.x_.Min()),
@@ -44,7 +48,7 @@ class AABB {
   }
 
   [[nodiscard]] bool Hit(const Ray& r, Interval t_interval) const {
-    const auto& origin = r.origin();
+    const auto& origin = r.Origin();
     const auto& inv_direction = r.InverseDirection();
 
     auto tmin = t_interval.Min();
@@ -73,6 +77,19 @@ class AABB {
   }
 
  private:
+  void PadToMinimums() {
+    double delta = 0.0001;
+    if(x_.Size() < delta) {
+      x_.Expand(delta);
+    }
+    if(y_.Size() < delta) {
+      y_.Expand(delta);
+    }
+    if(z_.Size() < delta) {
+      z_.Expand(delta);
+    }
+  }
+
   Interval x_, y_, z_;
 };
 

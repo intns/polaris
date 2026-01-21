@@ -182,7 +182,7 @@ image::PixelF64 Camera::RayColour(const math::Ray& r, std::uint32_t depth,
     return {0, 0, 0};
   }
 
-  math::Vec3 unit_direction = r.direction().Normalized();
+  math::Vec3 unit_direction = r.Direction().Normalized();
   auto a = 0.5 * (unit_direction.Y() + 1.0);
   // Blue-ish sky gradient from white at the horizon to light blue at the top
   return (1.0 - a) * image::PixelF64(1.0, 1.0, 1.0) +

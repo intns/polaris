@@ -19,11 +19,11 @@ class Metal : public Material {
   bool Scatter(const math::Ray& in, const scene::HitInfo& info,
                image::PixelF64& attenuation,
                math::Ray& scattered) const noexcept override {
-    auto reflected = in.direction().Normalized().Reflect(info.normal_);
+    auto reflected = in.Direction().Normalized().Reflect(info.normal_);
     reflected = reflected + (fuzz_ * math::Vec3::RandomUnitVector());
     scattered = math::Ray(info.point_, reflected, in.Time());
     attenuation = albedo_;
-    return (scattered.direction().Dot(info.normal_) > 0);
+    return (scattered.Direction().Dot(info.normal_) > 0);
   }
 
  private:
