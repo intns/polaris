@@ -5,11 +5,13 @@
 #include <cstdint>
 #include <fstream>
 #include <image/Pixel.hpp>
+#include <vector>
 
 namespace polaris::image {
 enum class FileFormat : std::uint8_t {
-  PPM = 0,  // Portable Pixmap (ASCII)
-  BMP,      // Windows Bitmap (uncompressed)
+  BMP = 0,  // Windows Bitmap (stb_image_write)
+  PNG,      // Portable Network Graphics (stb_image_write)
+  JPG,      // JPEG (stb_image_write)
 };
 
 class FrameBuffer {
@@ -33,6 +35,8 @@ class FrameBuffer {
  private:
   void WriteAsPPM(std::ofstream& out);
   void WriteAsBMP(std::ofstream& out);
+  void WriteAsPNG(std::ofstream& out);
+  void WriteAsJPG(std::ofstream& out);
 
   FileFormat format_ = FileFormat::BMP;
   std::size_t width_ = 0, height_ = 0;

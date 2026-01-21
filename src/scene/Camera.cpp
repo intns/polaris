@@ -123,8 +123,13 @@ void Camera::Write(const std::string& filename) {
       file_path.replace_extension(".bmp");
       file_mode |= std::ios::binary;
       break;
-    case image::FileFormat::PPM:
-      file_path.replace_extension(".ppm");
+    case image::FileFormat::PNG:
+      file_path.replace_extension(".png");
+      file_mode |= std::ios::binary;
+      break;
+    case image::FileFormat::JPG:
+      file_path.replace_extension(".jpg");
+      file_mode |= std::ios::binary;
       break;
     default:
       return;  // Unsupported format

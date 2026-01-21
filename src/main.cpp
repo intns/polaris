@@ -82,17 +82,13 @@ int main(int argc, char** argv) {
   scene::CameraSettings settings;
   settings.aspect_ratio = 16.0 / 9.0;
   settings.image_width = 1280;
-  settings.samples_per_pixel = 100;
+  settings.samples_per_pixel = 10;
   settings.max_depth_ = 10;
   settings.fov = 20.0;
   settings.defocus_angle = 0.6;
   settings.focus_dist = 1.0;
 
-#ifdef _WIN32
-  settings.output_format_ = image::FileFormat::BMP;
-#else
-  settings.output_format_ = image::FileFormat::PPM;
-#endif
+  settings.output_format_ = image::FileFormat::PNG;
 
   scene::Camera cam(settings);
   cam.SetTarget(math::Vec3(13, 2, 3), math::Vec3{0, 0, 0});
