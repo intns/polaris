@@ -49,6 +49,7 @@ Debug/
 .ipch/
 *.VC.db
 *.opendb
+.vs
 
 # OS
 .DS_Store

@@ -10,6 +10,7 @@
 #include <string>
 
 #include "scene/texture/CheckerTexture.hpp"
+#include "scene/texture/PerlinNoise.hpp"
 
 using namespace polaris;
 
@@ -37,7 +38,8 @@ int main(int argc, char** argv) {
     // Book cover image test
 
     auto checker = std::make_shared<scene::texture::CheckerTexture>(0.32, image::PixelF64(0.2, 0.3, 0.1), image::PixelF64(0.9, 0.9, 0.9));
-    world.Add(std::make_shared<Sphere>(math::Vec3(0,-1000,0), 1000, std::make_shared<Lambertian>(checker)));
+    auto perlin = std::make_shared<scene::texture::NoiseTexture>(4);
+    world.Add(std::make_shared<Sphere>(math::Vec3(0,-1000,0), 1000, std::make_shared<Lambertian>(perlin)));
 
     for (int a = -11; a < 11; a++) {
       for (int b = -11; b < 11; b++) {
